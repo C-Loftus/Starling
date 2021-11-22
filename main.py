@@ -12,8 +12,9 @@ while True:
     print("mainthread")
     # p.join()
     # wf = record()
-    m = model.SpeechToTextEngine("COQUI/model.pbmm", "COQUI/s.scorer")
-    print(m.run())
+    # m = model.SpeechToTextEngine("COQUI/model.pbmm", "COQUI/s.scorer")
+    # print(m.run())
+    print(model.runModel())
 
 
 
