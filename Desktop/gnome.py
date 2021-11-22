@@ -1,4 +1,4 @@
-import gi
+import gi, os
 from threading import Thread
 import time 
 from multiprocessing import Process, Lock
@@ -15,7 +15,10 @@ def timer_wait(lock, title, message=None, extra=None, seconds=None):
         # n.set_timeout(0)
         print(f'Starting timer for {seconds} seconds')
         time.sleep(seconds)
-        playsound("Assets/Sounds/bowl.mp3")
+        dirname = os.path.dirname(__file__)
+        filename = os.path.join(dirname, "bowl.mp3")
+
+        playsound(filename)
         n.show()
 
 
@@ -26,6 +29,10 @@ def make_gnome_timer(lock, title=None, message=None, extra=None, seconds=None):
 
 
 if __name__ == "__main__":
-    make_gnome_timer("timer", seconds=5)
-    print("test")
+    timer_lock = Lock()
+
+    while True:
+        p = make_gnome_timer(timer_lock, title="Timer", seconds=5)
+        print("mainthread")
+        p.join()
 
