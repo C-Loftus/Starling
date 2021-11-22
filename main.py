@@ -11,7 +11,7 @@ while True:
     p = make_gnome_timer(timer_lock, title="Timer", seconds=5*60)
     print("mainthread")
     # p.join()
-    wf = record()
+    # wf = record()
     m = model.SpeechToTextEngine("COQUI/model.pbmm", "COQUI/s.scorer")
     print(m.run())
 
