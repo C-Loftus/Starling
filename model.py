@@ -7,6 +7,9 @@ import ffmpeg
 import numpy as np
 
 
+MODEL_PATH = "COQUI/model.tflite"
+SCORER_PATH = "COQUI/s.scorer"
+
 class SpeechToTextEngine:
     def __init__(self, model_path, scorer_path):
         self.model = Model(model_path=model_path)
@@ -23,7 +26,7 @@ class SpeechToTextEngine:
 # stt --model model.pbmm --scorer s.scorer --audio ../Assets/recorded.wav
 def runModel(audio_path):
 
-    p = subprocess.Popen(["stt", "--model", "COQUI/model.tflite", "--scorer", "COQUI/s.scorer", "--audio", audio_path], \
+    p = subprocess.Popen(["stt", "--model", MODEL_PATH, "--scorer", SCORER_PATH, "--audio", audio_path], \
                     stdout=subprocess.PIPE)
     return iter(p.stdout.readline, b'')
 
