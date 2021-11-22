@@ -21,15 +21,14 @@ class SpeechToTextEngine:
         return result
 
 # stt --model model.pbmm --scorer s.scorer --audio ../Assets/recorded.wav
-def runModel():
+def runModel(audio_path):
 
-    p = subprocess.Popen(["stt", "--model", "COQUI/model.tflite", "--scorer", "COQUI/s.scorer", "--audio", "recorded.wav"], \
+    p = subprocess.Popen(["stt", "--model", "COQUI/model.tflite", "--scorer", "COQUI/s.scorer", "--audio", audio_path], \
                     stdout=subprocess.PIPE)
-    
-    output = ''
-    for line in iter(p.stdout.readline):
-        output += line
-    return output
+    return iter(p.stdout.readline, b'')
+
 
 if __name__ == "__main__":
-    runModel()
+    output = runModel("Assets/good_test.wav")
+    for line in output:
+        print(line)

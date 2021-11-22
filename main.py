@@ -14,7 +14,9 @@ while True:
     # wf = record()
     # m = model.SpeechToTextEngine("COQUI/model.pbmm", "COQUI/s.scorer")
     # print(m.run())
-    print(model.runModel())
+    output = model.runModel()
+    for line in output:
+        print(line)
 
 
 
