@@ -26,8 +26,8 @@ def runModel():
     p = subprocess.Popen(["stt", "--model", "COQUI/model.tflite", "--scorer", "COQUI/s.scorer", "--audio", "recorded.wav"], \
                     stdout=subprocess.PIPE)
     
-    output = b''
-    for line in iter(p.stdout.readline, b''):
+    output = ''
+    for line in iter(p.stdout.readline):
         output += line
     return output
 
