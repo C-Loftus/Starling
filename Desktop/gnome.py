@@ -1,5 +1,4 @@
 import gi, os, sys
-from threading import Thread
 import time 
 from multiprocessing import Process, Lock
 from playsound import playsound
