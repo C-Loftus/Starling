@@ -23,7 +23,7 @@ def rms( data ):
 def decibel(rms):
     return 20 * math.log(rms, 10)
 
-def record():
+def record(event):
     # the file name output you want to record into
     filename = "Assets/recorded.wav"
     # set the chunk size of 1024 samples
@@ -48,6 +48,9 @@ def record():
     frames = []
 
     for i in range(int(44100 / chunk * record_seconds)):
+        if event.is_set():
+            break
+        # if signal: break else
         data = stream.read(chunk)
         # print(decibel(rms(data)))
         # if you want to hear your voice while recording
@@ -72,6 +75,7 @@ def record():
     wf.writeframes(b"".join(frames))
     # close the file
     wf.close()
+    print("finished recording")
 
 if __name__ == "__main__":
     record()
