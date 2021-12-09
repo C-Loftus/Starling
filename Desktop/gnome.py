@@ -1,4 +1,4 @@
-import gi, os
+import gi, os, sys
 from threading import Thread
 import time 
 from multiprocessing import Process, Lock
@@ -30,9 +30,13 @@ def make_gnome_timer(lock, title=None, message=None, extra=None, seconds=None):
 
 if __name__ == "__main__":
     timer_lock = Lock()
+    seconds = 60 * 5
+    if len(sys.argv) > 1:
+        minutes = sys.argv[1]
+        seconds = int(minutes) * 60
 
     while True:
-        p = make_gnome_timer(timer_lock, title="Timer", seconds=5)
+        p = make_gnome_timer(timer_lock, title="Timer", seconds=seconds)
         print("mainthread")
         p.join()
 

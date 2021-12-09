@@ -2,8 +2,12 @@ import pyaudio
 import wave
 import numpy
 import aubio
-import struct
+import struct, sys, contextlib
 import math
+
+
+# pre processing wav. Get a buffer?
+# normalize audio and get the mean? only record with it is high
 
 def rms( data ):
     count = len(data)/2
@@ -33,6 +37,7 @@ def record():
     record_seconds = 5
     # initialize PyAudio object
     p = pyaudio.PyAudio()
+    
     # open stream object as input & output
     stream = p.open(format=FORMAT,
                     channels=channels,
@@ -41,7 +46,7 @@ def record():
                     output=True,
                     frames_per_buffer=chunk)
     frames = []
-    print("Recording...")
+
     for i in range(int(44100 / chunk * record_seconds)):
         data = stream.read(chunk)
         # print(decibel(rms(data)))
@@ -49,7 +54,6 @@ def record():
         # stream.write(data)
         frames.append(data)
 
-    print("Finished recording.")
     # stop and close stream
     stream.stop_stream()
     stream.close()

@@ -6,22 +6,23 @@ import subprocess
 import ffmpeg
 import numpy as np
 
+# TODO https://stt.readthedocs.io/en/latest/Python-API.html
+from stt import Model
+
 
 MODEL_PATH = "COQUI/model.tflite"
 SCORER_PATH = "COQUI/s.scorer"
 
-class SpeechToTextEngine:
-    def __init__(self, model_path, scorer_path):
-        self.model = Model(model_path=model_path)
-        self.model.enableExternalScorer(scorer_path=scorer_path)
+# class SpeechToTextEngine:
+#     def __init__(self, model_path, scorer_path):
+#         self.model = Model(model_path=model_path)
+#         self.model.enableExternalScorer(scorer_path=scorer_path)
 
-    def run(self):
-        # audio = BytesIO(audio)
-        # with wave.Wave_read(audio) as wav:
-        wav = wave.Wave_read("Assets/recorded.wav")
-        audio = np.frombuffer(wav.readframes(wav.getnframes()), np.int16)
-        result = self.model.stt(audio_buffer=audio)
-        return result
+#     def run(self):
+#         wav = wave.Wave_read("Assets/recorded.wav")
+#         audio = np.frombuffer(wav.readframes(wav.getnframes()), np.int16)
+#         result = self.model.stt(audio_buffer=audio)
+#         return result
 
 # stt --model model.pbmm --scorer s.scorer --audio ../Assets/recorded.wav
 def runModel(audio_path):

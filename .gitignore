@@ -1,3 +1,5 @@
 IW_Voice/
 COQUI/
 Assets/*
+__pycache__
+.vscode
