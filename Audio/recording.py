@@ -99,6 +99,7 @@ def record_finish(event):
 
 
 def record_intermed(bf_stop):
+   frames = []
    while(True):
       # set the chunk size of 1024 samples
       chunk = 1024
@@ -119,7 +120,6 @@ def record_intermed(bf_stop):
                      input=True,
                      output=True,
                      frames_per_buffer=chunk)
-      frames = []    
       
       for i in range(int(44100 / chunk * record_seconds)):
          # if signal: break else
@@ -128,12 +128,13 @@ def record_intermed(bf_stop):
          # if you want to hear your voice while recording
          # stream.write(data)
          frames.append(data)
+      env.frames = frames 
+      
 
       stream.stop_stream()
       stream.close()
       # terminate pyaudio object
       p.terminate()
-      env.frames = frames
       if bf_stop.is_set():
          return
 
@@ -157,7 +158,7 @@ def record_one_phrase():
 
    my_thread.bt.start()
    while(1):
-      print(f'{my_thread.bt.is_alive()=}')
+      # print(f'{my_thread.bt.is_alive()=}')
       
       set_vol(initialize=False, duration=10)
 
