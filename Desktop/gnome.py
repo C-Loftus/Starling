@@ -13,6 +13,7 @@ def timer_wait(lock, title, message=None, extra=None, seconds=None):
                                     extra)
         # n.set_timeout(0)
         print(f'Starting timer for {seconds} seconds')
+
         time.sleep(seconds)
         dirname = os.path.dirname(__file__)
         filename = os.path.join(dirname, "bowl.mp3")

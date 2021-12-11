@@ -11,7 +11,7 @@ from stt import Model
 
 
 MODEL_PATH = "COQUI/model.tflite"
-SCORER_PATH = "COQUI/s.scorer"
+SCORER_PATH = "COQUI/large_vocabulary.scorer"
 
 # class SpeechToTextEngine:
 #     def __init__(self, model_path, scorer_path):

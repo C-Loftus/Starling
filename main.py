@@ -1,17 +1,15 @@
-from Audio.audio import record
 from Desktop.gnome import make_gnome_timer
 from multiprocessing import Lock
 import model
-from Audio.audio import audio_environment
+from Audio.recording import *
 
 timer_lock = Lock()
 
-audio_environment.set_vol(initialize=True)
+set_vol(initialize=True, duration=2000 )
 
 while True:
     print("mainthread")
-    audio_environment.record_one_phrase()
-
+    record_one_phrase()
 
     output = model.runModel("Assets/recorded.wav")
     for i in output:
