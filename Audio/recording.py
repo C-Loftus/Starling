@@ -20,40 +20,7 @@ class env:
    ambient = 0.0
    frames=[]
    
-def record_one_phrase():
-   # print(f'{env.ambient=}')    
 
-   currentlyRecording = False
-   stop_event = threading.Event()
-   buffer_stop_event = threading.Event()
-   
-   
-   
-   bt = Thread(target=record_finish, args=[buffer_stop_event])
-   # need to spawn a thread for this and kill it when valid to start.
-   
-   while(1):
-      if not bt.is_alive:
-         env.frames = []
-         bt.start()
-
-      set_vol(initialize=False, duration=10)
-
-      if valid_to_start() and not currentlyRecording:
-         if bt.is_alive():
-            bt.join()
-         t = Thread(target=record_finish, args=[stop_event])
-         
-         # spawn thread 
-         print("starting recording thread")
-         t.start()
-         currentlyRecording = True
-      elif valid_to_stop() and currentlyRecording:
-         # send signal to stop
-         print("stopping recording thread")
-         stop_event.set()
-         currentlyRecording = False
-         return
 
 def valid_to_start(hyperparamVolume = 1):
    return (get_vol() > (env.ambient + hyperparamVolume))       
@@ -131,41 +98,87 @@ def record_finish(event):
    print("finished recording")       
 
 
-def record_intermed():
-   # set the chunk size of 1024 samples
-   chunk = 1024
-   # sample format
-   FORMAT = pyaudio.paInt16
-   # mono, change to 2 if you want stereo
-   channels = 1
-   # 44100 samples per second
-   sample_rate = 44100
-   record_seconds = .5
-   # initialize PyAudio object
-   p = pyaudio.PyAudio()
-   
-   # open stream object as input & output
-   stream = p.open(format=FORMAT,
-                   channels=channels,
-                   rate=sample_rate,
-                   input=True,
-                   output=True,
-                   frames_per_buffer=chunk)
-   frames = []    
-   
-   for i in range(int(44100 / chunk * record_seconds)):
-        # if signal: break else
-        data = stream.read(chunk)
-        # print(decibel(rms(data)))
-        # if you want to hear your voice while recording
-        # stream.write(data)
-        frames.append(data)
-   stream.stop_stream()
-   stream.close()
-   # terminate pyaudio object
-   p.terminate()
+def record_intermed(bf_stop):
+   while(True):
+      # set the chunk size of 1024 samples
+      chunk = 1024
+      # sample format
+      FORMAT = pyaudio.paInt16
+      # mono, change to 2 if you want stereo
+      channels = 1
+      # 44100 samples per second
+      sample_rate = 44100
+      record_seconds = .5
+      # initialize PyAudio object
+      p = pyaudio.PyAudio()
+      
+      # open stream object as input & output
+      stream = p.open(format=FORMAT,
+                     channels=channels,
+                     rate=sample_rate,
+                     input=True,
+                     output=True,
+                     frames_per_buffer=chunk)
+      frames = []    
+      
+      for i in range(int(44100 / chunk * record_seconds)):
+         # if signal: break else
+         data = stream.read(chunk)
+         # print(decibel(rms(data)))
+         # if you want to hear your voice while recording
+         # stream.write(data)
+         frames.append(data)
 
-   env.frames = frames
+      stream.stop_stream()
+      stream.close()
+      # terminate pyaudio object
+      p.terminate()
+      env.frames = frames
+      if bf_stop.is_set():
+         return
+
+
+
+def record_one_phrase():
+   bf_stop = threading.Event()
+   
+   class my_thread:
+      bt = Thread(target=record_intermed, args=[bf_stop])
+      total = 0
+
+   currentlyRecording = False
+   stop_event = threading.Event()
+   # if not my_thread.bt.is_alive() and my_thread.total == 0:
+   #    print("starting my_thread.bt")
+   #    my_thread.total += 1
+   #    env.frames = []
+   #    my_thread.bt = Thread(target=record_intermed, args=[bf_stop])
+   #    my_thread.bt.run()   
+
+   my_thread.bt.start()
+   while(1):
+      print(f'{my_thread.bt.is_alive()=}')
+      
+      set_vol(initialize=False, duration=10)
+
+      if valid_to_start() and not currentlyRecording:
+         if my_thread.bt.is_alive():
+            print("joining")
+            bf_stop.set()
+            my_thread.total = 0
+         t = Thread(target=record_finish, args=[stop_event])
+         
+         # spawn thread 
+         print("starting recording thread")
+         t.start()
+         currentlyRecording = True
+      elif valid_to_stop() and currentlyRecording:
+         # send signal to stop
+         print("stopping recording thread")
+         stop_event.set()
+         env.frames = []
+         currentlyRecording = False
+         return
 
 if __name__== "__main__":
    set_vol(initialize=True)
@@ -173,56 +186,56 @@ if __name__== "__main__":
    record_one_phrase()
 
 
-def record(event):
-    # the file name output you want to record into
-    filename = "Assets/recorded.wav"
-    # set the chunk size of 1024 samples
-    chunk = 1024
-    # sample format
-    FORMAT = pyaudio.paInt16
-    # mono, change to 2 if you want stereo
-    channels = 1
-    # 44100 samples per second
-    sample_rate = 44100
-    record_seconds = 5
-    # initialize PyAudio object
-    p = pyaudio.PyAudio()
+# def record(event):
+#     # the file name output you want to record into
+#     filename = "Assets/recorded.wav"
+#     # set the chunk size of 1024 samples
+#     chunk = 1024
+#     # sample format
+#     FORMAT = pyaudio.paInt16
+#     # mono, change to 2 if you want stereo
+#     channels = 1
+#     # 44100 samples per second
+#     sample_rate = 44100
+#     record_seconds = 5
+#     # initialize PyAudio object
+#     p = pyaudio.PyAudio()
     
-    # open stream object as input & output
-    stream = p.open(format=FORMAT,
-                    channels=channels,
-                    rate=sample_rate,
-                    input=True,
-                    output=True,
-                    frames_per_buffer=chunk)
-    frames = []
+#     # open stream object as input & output
+#     stream = p.open(format=FORMAT,
+#                     channels=channels,
+#                     rate=sample_rate,
+#                     input=True,
+#                     output=True,
+#                     frames_per_buffer=chunk)
+#     frames = []
 
-    for i in range(int(44100 / chunk * record_seconds)):
-        if event.is_set():
-            break
-        # if signal: break else
-        data = stream.read(chunk)
-        # print(decibel(rms(data)))
-        # if you want to hear your voice while recording
-        # stream.write(data)
-        frames.append(data)
+#     for i in range(int(44100 / chunk * record_seconds)):
+#         if event.is_set():
+#             break
+#         # if signal: break else
+#         data = stream.read(chunk)
+#         # print(decibel(rms(data)))
+#         # if you want to hear your voice while recording
+#         # stream.write(data)
+#         frames.append(data)
 
-    # stop and close stream
-    stream.stop_stream()
-    stream.close()
-    # terminate pyaudio object
-    p.terminate()
-    # save audio file
-    # open the file in 'write bytes' mode
-    wf = wave.open(filename, "wb")
-    # set the channels
-    wf.setnchannels(channels)
-    # set the sample format
-    wf.setsampwidth(p.get_sample_size(FORMAT))
-    # set the sample rate
-    wf.setframerate(sample_rate)
-    # write the frames as bytes
-    wf.writeframes(b"".join(frames))
-    # close the file
-    wf.close()
-    print("finished recording")
+#     # stop and close stream
+#     stream.stop_stream()
+#     stream.close()
+#     # terminate pyaudio object
+#     p.terminate()
+#     # save audio file
+#     # open the file in 'write bytes' mode
+#     wf = wave.open(filename, "wb")
+#     # set the channels
+#     wf.setnchannels(channels)
+#     # set the sample format
+#     wf.setsampwidth(p.get_sample_size(FORMAT))
+#     # set the sample rate
+#     wf.setframerate(sample_rate)
+#     # write the frames as bytes
+#     wf.writeframes(b"".join(frames))
+#     # close the file
+#     wf.close()
+#     print("finished recording")
