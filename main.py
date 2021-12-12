@@ -15,7 +15,7 @@ while True:
     for i in output:
         print(i)
 
-    if b'timer' in output:
+    if b'time' in output:
         p = make_gnome_timer(timer_lock, title="Timer", seconds=5*60)
 
 
