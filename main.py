@@ -12,10 +12,17 @@ while True:
     record_one_phrase()
 
     output = model.runModel("Assets/recorded.wav")
-    for i in output:
-        print(i)
 
-    if b'time' in output:
+
+    for i in output:
+        i = (i.decode("utf-8"))
+        print(i, "\n")
+        if 'time' in i:
+            print("****************** STARTING TIMER ******************")
+            p = make_gnome_timer(timer_lock, title="Timer", seconds=5*60)
+
+
+    if 'time' in output:
         p = make_gnome_timer(timer_lock, title="Timer", seconds=5*60)
 
 

@@ -154,7 +154,7 @@ def record_one_phrase():
 
    print(f'{env.ambient=}{get_vol()=}')
    while(1):
-      print(f'{env.ambient=}{get_vol()=}')
+      # print(f'{env.ambient=}{get_vol()=}')
 
       set_vol(initialize=False, duration=10)
 
