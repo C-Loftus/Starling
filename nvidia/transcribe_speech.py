@@ -155,55 +155,7 @@ def main(cfg: TranscriptionConfig):
 
     print(autocast, asr_model, filepaths, cfg.batch_size)
     return autocast, asr_model, filepaths, cfg.batch_size
-    # # Compute output filename
-    # if cfg.output_filename is None:
-    #     # create default output filename
-    #     if cfg.audio_dir is not None:
-    #         cfg.output_filename = os.path.dirname(os.path.join(cfg.audio_dir, '.')) + '.json'
-    #     else:
-    #         cfg.output_filename = cfg.dataset_manifest.replace('.json', f'_{model_name}.json')
 
-    # # if transcripts should not be overwritten, and already exists, skip re-transcription step and return
-    # if not cfg.overwrite_transcripts and os.path.exists(cfg.output_filename):
-    #     logging.info(
-    #         f"Previous transcripts found at {cfg.output_filename}, and flag `overwrite_transcripts`"
-    #         f"is {cfg.overwrite_transcripts}. Returning without re-transcribing text."
-    #     )
-
-        # return cfg
-
-    # transcribe audio
-    # with autocast():
-    #     with torch.no_grad():
-    #         transcriptions = asr_model.transcribe(filepaths, batch_size=cfg.batch_size)
-    # logging.info(f"Finished transcribing {len(filepaths)} files !")
-
-
-    # # if transcriptions form a tuple (from RNNT), extract just "best" hypothesis
-    # if type(transcriptions) == tuple and len(transcriptions) == 2:
-    #     transcriptions = transcriptions[0]
-
-    # ##
-    # print(transcriptions)
-    # return transcriptions
-    ##
-                # logging.info(f"Writing transcriptions into file: {cfg.output_filename}")
-                # write audio transcriptions
-                # with open(cfg.output_filename, 'w', encoding='utf-8') as f:
-                #     if cfg.audio_dir is not None:
-                #         print("*********************NOT NONE**********************")
-                #         for idx, text in enumerate(transcriptions):
-                #             item = {'audio_filepath': filepaths[idx], 'pred_text': text}
-                #             f.write(json.dumps(item) + "\n")
-                #     else:
-                #         with open(cfg.dataset_manifest, 'r') as fr:
-                #             for idx, line in enumerate(fr):
-                #                 item = json.loads(line)
-                #                 item['pred_text'] = transcriptions[idx]
-                #                 f.write(json.dumps(item) + "\n")
-
-                # logging.info("Finished writing predictions !")
-                # return cfg
 
 def run_inference(autocast, asr_model, filepaths, batch_size):
     with autocast():
