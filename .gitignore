@@ -3,3 +3,6 @@ COQUI/
 Assets/*
 __pycache__
 .vscode
+nvidia/*.nemo
+Assets/*.wav
+*.json

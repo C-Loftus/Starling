@@ -23,9 +23,9 @@ def timer_wait(lock, title, message=None, extra=None, seconds=None):
 
 
 def make_gnome_timer(lock, title=None, message=None, extra=None, seconds=None):
-        p = Process(target=timer_wait, args=(lock, title, message, extra, seconds))
-        p.start()
-        return p
+    p = Process(target=timer_wait, args=(lock, title, message, extra, seconds))
+    p.start()
+    return p
 
 
 if __name__ == "__main__":

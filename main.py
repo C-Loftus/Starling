@@ -4,8 +4,7 @@ import model
 from Audio.recording import *
 
 timer_lock = Lock()
-
-set_vol(initialize=True, duration=2000 )
+env.set_vol(initialize=True)
 
 while True:
     print("mainthread")
@@ -19,7 +18,7 @@ while True:
         print(i, "\n")
         if 'time' in i:
             print("****************** STARTING TIMER ******************")
-            p = make_gnome_timer(timer_lock, title="Timer", seconds=5*60)
+            p = make_gnome_timer(timer_lock, title="Timer", seconds=3)
 
 
     if 'time' in output:

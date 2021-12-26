@@ -1,7 +1,5 @@
 import pyaudio
 import wave
-import struct
-import math
 from numpy.core.fromnumeric import mean
 import sounddevice as sd
 import threading
@@ -10,56 +8,45 @@ import numpy as np
 from numpy_ringbuffer import RingBuffer
 
 
-
-
-# create some sort of buffer for always recording then passing
-# in the buffer audio recording
+#  Stores information about the audio environment
 class env:
-   curr_vol = RingBuffer(capacity=50, dtype=np.float)
-   init_duration = 2000 #in milliseconds
+   curr_vol = RingBuffer(capacity=50, dtype=float)
+   init_duration = 5000 #in milliseconds
    ambient = 0.0
    frames=[]
+   start_hyperparameter=2 # the bigger the hyperparameter, the louder the env has to be to start
+   stop_hyperparameter=0.25 # the bigger the hyperparameter, louder it will be to stop
+
+   def get_vol():
+      return mean(env.curr_vol)
    
+   def valid_to_start():
+      return (env.get_vol() > (env.ambient * env.start_hyperparameter))       
+   def valid_to_stop(hyperparamVolume = 2):
+      return (env.get_vol() < (env.ambient + env.stop_hyperparameter))
 
+   def set_vol(initialize=False, duration=init_duration):
+      stream = sd.InputStream(callback=env._audio_callback)
+      with stream:
+         sd.sleep(duration)  
+      if initialize:      
+         env.ambient = env.get_vol()
 
-def valid_to_start(hyperparamVolume = 1.3):
-   return (get_vol() > (env.ambient * hyperparamVolume))       
-def valid_to_stop(hyperparamVolume = 2):
-   return (get_vol() < (env.ambient + hyperparamVolume))
-
-def set_vol(initialize=False, duration=env.init_duration):
-   stream = sd.InputStream(callback=_audio_callback)
-   with stream:
-      sd.sleep(duration)  
-   if initialize:      
-      env.ambient = get_vol()
-
-def get_vol():
-   return mean(env.curr_vol)
-
-def _audio_callback(indata, frames, time, status):
-   volume_norm = np.linalg.norm(indata) * 10
-   env.curr_vol.append(volume_norm)
+   def _audio_callback(indata, frames, time, status):
+      volume_norm = np.linalg.norm(indata) * 10
+      env.curr_vol.append(volume_norm)
 
 
 
 
 def record_finish(event):
-   # the file name output you want to record into
    filename = "Assets/recorded.wav"
-   # set the chunk size of 1024 samples
    chunk = 1024
-   # sample format
    FORMAT = pyaudio.paInt16
-   # mono, change to 2 if you want stereo
    channels = 1
-   # 44100 samples per second
    sample_rate = 16000
-
-   record_seconds = 5
-   # initialize PyAudio object
+   record_seconds = 5 # max length
    p = pyaudio.PyAudio()
-   
    # open stream object as input & output
    stream = p.open(format=FORMAT,
                    channels=channels,
@@ -71,30 +58,16 @@ def record_finish(event):
    for i in range(int(16000 / chunk * record_seconds)):
       if event.is_set():
             break
-      # if signal: break else
       data = stream.read(chunk)
-      # print(decibel(rms(data)))
-      # if you want to hear your voice while recording
-      # stream.write(data)
       frames.append(data)
-
-    # stop and close stream
    stream.stop_stream()
    stream.close()
-   # terminate pyaudio object
    p.terminate()
-   # save audio file
-   # open the file in 'write bytes' mode
    wf = wave.open(filename, "wb")
-   # set the channels
    wf.setnchannels(channels)
-   # set the sample format
    wf.setsampwidth(p.get_sample_size(FORMAT))
-   # set the sample rate
    wf.setframerate(sample_rate)
-   # write the frames as bytes
    wf.writeframes(b"".join(frames))
-   # close the file
    wf.close()
    print("finished recording")       
 
@@ -102,19 +75,12 @@ def record_finish(event):
 def record_intermed(bf_stop):
    frames = []
    while(True):
-      # set the chunk size of 1024 samples
       chunk = 1024
-      # sample format
       FORMAT = pyaudio.paInt16
-      # mono, change to 2 if you want stereo
-      channels = 1
-      # 44100 samples per second
+      channels = 1 # mono, change to 2 if you want stereo
       sample_rate = 16000
       record_seconds = 10
-      # initialize PyAudio object
       p = pyaudio.PyAudio()
-      
-      # open stream object as input & output
       stream = p.open(format=FORMAT,
                      channels=channels,
                      rate=sample_rate,
@@ -123,18 +89,12 @@ def record_intermed(bf_stop):
                      frames_per_buffer=chunk)
       
       for i in range(int(16000 / chunk * record_seconds)):
-         # if signal: break else
          data = stream.read(chunk)
-         # print(decibel(rms(data)))
-         # if you want to hear your voice while recording
-         # stream.write(data)
          frames.append(data)
       env.frames = frames 
-      
 
       stream.stop_stream()
       stream.close()
-      # terminate pyaudio object
       p.terminate()
       if bf_stop.is_set():
          return
@@ -142,33 +102,31 @@ def record_intermed(bf_stop):
 
 
 def record_one_phrase():
-       
-   bt_stop = threading.Event()
-   
-   bt = Thread(target=record_intermed, args=[bt_stop])
+   background_listener_stop = threading.Event()
+   background_listener = Thread(target=record_intermed, args=[background_listener_stop])
 
    currentlyRecording = False
    stop_event = threading.Event()
 
-   bt.start()
+   background_listener.start()
 
-   print(f'{env.ambient=}{get_vol()=}')
-   while(1):
+   print(f'{env.ambient=}{env.get_vol()=}')
+   while(True):
       # print(f'{env.ambient=}{get_vol()=}')
 
-      set_vol(initialize=False, duration=10)
+      env.set_vol(initialize=False, duration=10)
 
-      if valid_to_start() and not currentlyRecording:
-         if bt.is_alive():
+      if env.valid_to_start() and not currentlyRecording:
+         if background_listener.is_alive():
             print("joining")
-            bt_stop.set()
-         t = Thread(target=record_finish, args=[stop_event])
+            background_listener_stop.set()
+         main_recorder = Thread(target=record_finish, args=[stop_event])
          
          # spawn thread 
          print("starting recording thread")
-         t.start()
+         main_recorder.start()
          currentlyRecording = True
-      elif valid_to_stop() and currentlyRecording:
+      elif env.valid_to_stop() and currentlyRecording:
          # send signal to stop
          print("stopping recording thread. *************** Finished Word")
          stop_event.set()
@@ -178,6 +136,6 @@ def record_one_phrase():
       
 
 if __name__== "__main__":
-   set_vol(initialize=True)
-   print(get_vol())
+   env.set_vol(initialize=True)
    record_one_phrase()
+
