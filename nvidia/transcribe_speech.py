@@ -27,6 +27,7 @@ from nemo.collections.asr.metrics.rnnt_wer import RNNTDecodingConfig
 from nemo.collections.asr.models import ASRModel
 from nemo.core.config import hydra_runner
 from nemo.utils import logging, model_utils
+from torch._C import TupleType, autocast_decrement_nesting
 
 
 """
@@ -73,7 +74,7 @@ class TranscriptionConfig:
 
     # General configs
     output_filename: Optional[str] = None
-    batch_size: int = 32
+    batch_size: int = 256
 
     # Set `cuda` to int to define CUDA device. If 'None', will look for CUDA
     # device anyway, and do inference on CPU only if CUDA device is not found.
@@ -89,8 +90,8 @@ class TranscriptionConfig:
     rnnt_decoding: RNNTDecodingConfig = RNNTDecodingConfig()
 
 
-@hydra_runner(config_name="TranscriptionConfig", schema=TranscriptionConfig)
-def main(cfg: TranscriptionConfig) -> TranscriptionConfig:
+# @hydra_runner(config_name="TranscriptionConfig", schema=TranscriptionConfig)
+def main(cfg: TranscriptionConfig):
     logging.info(f'Hydra config: {OmegaConf.to_yaml(cfg)}')
 
     if cfg.model_path is None and cfg.pretrained_name is None:
@@ -121,9 +122,10 @@ def main(cfg: TranscriptionConfig) -> TranscriptionConfig:
         asr_model = ASRModel.from_pretrained(model_name=cfg.pretrained_name, map_location=device)  # type: ASRModel
         model_name = cfg.pretrained_name
 
-    trainer = pl.Trainer(gpus=[cfg.cuda] if cfg.cuda >= 0 else 0)
-    asr_model.set_trainer(trainer)
+    # trainer = pl.Trainer(gpus=[cfg.cuda] if cfg.cuda >= 0 else 0)
+    # asr_model.set_trainer(trainer)
     asr_model = asr_model.eval()
+
 
     # Setup decoding strategy
     if hasattr(asr_model, 'change_decoding_strategy'):
@@ -151,51 +153,79 @@ def main(cfg: TranscriptionConfig) -> TranscriptionConfig:
         def autocast():
             yield
 
-    # Compute output filename
-    if cfg.output_filename is None:
-        # create default output filename
-        if cfg.audio_dir is not None:
-            cfg.output_filename = os.path.dirname(os.path.join(cfg.audio_dir, '.')) + '.json'
-        else:
-            cfg.output_filename = cfg.dataset_manifest.replace('.json', f'_{model_name}.json')
+    print(autocast, asr_model, filepaths, cfg.batch_size)
+    return autocast, asr_model, filepaths, cfg.batch_size
+    # # Compute output filename
+    # if cfg.output_filename is None:
+    #     # create default output filename
+    #     if cfg.audio_dir is not None:
+    #         cfg.output_filename = os.path.dirname(os.path.join(cfg.audio_dir, '.')) + '.json'
+    #     else:
+    #         cfg.output_filename = cfg.dataset_manifest.replace('.json', f'_{model_name}.json')
 
-    # if transcripts should not be overwritten, and already exists, skip re-transcription step and return
-    if not cfg.overwrite_transcripts and os.path.exists(cfg.output_filename):
-        logging.info(
-            f"Previous transcripts found at {cfg.output_filename}, and flag `overwrite_transcripts`"
-            f"is {cfg.overwrite_transcripts}. Returning without re-transcribing text."
-        )
+    # # if transcripts should not be overwritten, and already exists, skip re-transcription step and return
+    # if not cfg.overwrite_transcripts and os.path.exists(cfg.output_filename):
+    #     logging.info(
+    #         f"Previous transcripts found at {cfg.output_filename}, and flag `overwrite_transcripts`"
+    #         f"is {cfg.overwrite_transcripts}. Returning without re-transcribing text."
+    #     )
 
-        return cfg
+        # return cfg
 
     # transcribe audio
+    # with autocast():
+    #     with torch.no_grad():
+    #         transcriptions = asr_model.transcribe(filepaths, batch_size=cfg.batch_size)
+    # logging.info(f"Finished transcribing {len(filepaths)} files !")
+
+
+    # # if transcriptions form a tuple (from RNNT), extract just "best" hypothesis
+    # if type(transcriptions) == tuple and len(transcriptions) == 2:
+    #     transcriptions = transcriptions[0]
+
+    # ##
+    # print(transcriptions)
+    # return transcriptions
+    ##
+                # logging.info(f"Writing transcriptions into file: {cfg.output_filename}")
+                # write audio transcriptions
+                # with open(cfg.output_filename, 'w', encoding='utf-8') as f:
+                #     if cfg.audio_dir is not None:
+                #         print("*********************NOT NONE**********************")
+                #         for idx, text in enumerate(transcriptions):
+                #             item = {'audio_filepath': filepaths[idx], 'pred_text': text}
+                #             f.write(json.dumps(item) + "\n")
+                #     else:
+                #         with open(cfg.dataset_manifest, 'r') as fr:
+                #             for idx, line in enumerate(fr):
+                #                 item = json.loads(line)
+                #                 item['pred_text'] = transcriptions[idx]
+                #                 f.write(json.dumps(item) + "\n")
+
+                # logging.info("Finished writing predictions !")
+                # return cfg
+
+def run_inference(autocast, asr_model, filepaths, batch_size):
     with autocast():
         with torch.no_grad():
-            transcriptions = asr_model.transcribe(filepaths, batch_size=cfg.batch_size)
-    logging.info(f"Finished transcribing {len(filepaths)} files !")
-
-    logging.info(f"Writing transcriptions into file: {cfg.output_filename}")
-
-    # if transcriptions form a tuple (from RNNT), extract just "best" hypothesis
-    if type(transcriptions) == tuple and len(transcriptions) == 2:
-        transcriptions = transcriptions[0]
-
-    # write audio transcriptions
-    with open(cfg.output_filename, 'w', encoding='utf-8') as f:
-        if cfg.audio_dir is not None:
-            for idx, text in enumerate(transcriptions):
-                item = {'audio_filepath': filepaths[idx], 'pred_text': text}
-                f.write(json.dumps(item) + "\n")
-        else:
-            with open(cfg.dataset_manifest, 'r') as fr:
-                for idx, line in enumerate(fr):
-                    item = json.loads(line)
-                    item['pred_text'] = transcriptions[idx]
-                    f.write(json.dumps(item) + "\n")
-
-    logging.info("Finished writing predictions !")
-    return cfg
+            transcriptions = asr_model.transcribe(filepaths, batch_size=batch_size)
+    return transcriptions
 
 
 if __name__ == '__main__':
-    main()  # noqa pylint: disable=no-value-for-parameter
+    TranscriptionConfig.model_path = "nvidia/stt_en_conformer_ctc_medium.nemo"
+    TranscriptionConfig.pretrained_name = "stt_en_conformer_ctc_medium"
+    TranscriptionConfig.cuda = -1
+    TranscriptionConfig.audio_dir = "Assets/"
+    TranscriptionConfig.audio_type = "wav"
+    TranscriptionConfig.batch_size=128
+
+    out = main(TranscriptionConfig)  
+    transcriptions = run_inference(out[0], out[1], out[2], out[3])
+    print(transcriptions)
+    transcriptions = run_inference(out[0], out[1], out[2], out[3])
+    print(transcriptions)
+    transcriptions = run_inference(out[0], out[1], out[2], out[3])
+    print(transcriptions)
+    transcriptions = run_inference(out[0], out[1], out[2], out[3])
+    print(transcriptions)

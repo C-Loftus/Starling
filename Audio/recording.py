@@ -104,6 +104,7 @@ def record_intermed(bf_stop):
 def record_one_phrase():
    background_listener_stop = threading.Event()
    background_listener = Thread(target=record_intermed, args=[background_listener_stop])
+   background_listener.setDaemon(True)
 
    currentlyRecording = False
    stop_event = threading.Event()
