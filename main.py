@@ -17,7 +17,6 @@ def init():
 
 def main():
     init()
-
     while True:
         print("mainthread")
         record_one_phrase()

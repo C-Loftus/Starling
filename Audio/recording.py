@@ -7,14 +7,13 @@ from threading import Thread
 import numpy as np
 from numpy_ringbuffer import RingBuffer
 from playsound import playsound 
-
+import queue
 
 #  Stores information about the audio environment
 class env:
    curr_vol = RingBuffer(capacity=100, dtype=float)
    init_duration = 5000 #in milliseconds
    ambient = 0.0
-   frames=[]
    start_hyperparameter=2 # the bigger the hyperparameter, the louder the env has to be to start
    stop_hyperparameter=0.25 # the bigger the hyperparameter, louder it will be to stop
 
@@ -46,7 +45,7 @@ class env:
 
 
 
-def record_finish(event):
+def record_finish(event, frames):
    filename = "Assets/recorded.wav"
    record_seconds = 3 # max length
    p = pyaudio.PyAudio()
@@ -57,7 +56,6 @@ def record_finish(event):
                    input=True,
                    output=True,
                    frames_per_buffer=env.chunk)
-   frames = env.frames
    for i in range(int(env.sample_rate / env.chunk * record_seconds)):
       if event.is_set():
          break
@@ -76,10 +74,10 @@ def record_finish(event):
    print("finished recording")       
 
 
-def record_background(stop_signal):
-   frames = []
+def record_background(stop_signal, q):
    while(True):
-      record_seconds = 5
+      frames = []
+      record_seconds = 2 
       p = pyaudio.PyAudio()
       stream = p.open(format=env.FORMAT,
                      channels=env.channels,
@@ -91,20 +89,21 @@ def record_background(stop_signal):
       for i in range(int(env.sample_rate / env.chunk * record_seconds)):
          data = stream.read(env.chunk)
          frames.append(data)
-      env.frames = frames 
 
       stream.stop_stream()
       stream.close()
       p.terminate()
       if stop_signal.is_set():
-         return
+         q.put(frames)
+         return frames
 
 
 
 def record_one_phrase():
+   q = queue.Queue()
    background_listener_stop = threading.Event()
-   background_listener = Thread(target=record_background, args=[background_listener_stop])
-   background_listener.setDaemon(True)
+   background_listener = Thread(target=record_background, args=[background_listener_stop, q])
+   # background_listener.setDaemon(True)
 
    currentlyRecording = False
    stop_event = threading.Event()
@@ -120,7 +119,8 @@ def record_one_phrase():
          if background_listener.is_alive():
             print("joining background thread")
             background_listener_stop.set()
-         main_recorder = Thread(target=record_finish, args=[stop_event])
+         frames = q.get()
+         main_recorder = Thread(target=record_finish, args=[stop_event, frames])
          
          # spawn thread 
          print("starting recording thread")
@@ -130,7 +130,6 @@ def record_one_phrase():
          # send signal to stop
          print("stopping recording thread. *************** Finished Word")
          stop_event.set()
-         env.frames = []
          currentlyRecording = False
          return
       
