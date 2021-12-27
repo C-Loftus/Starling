@@ -6,16 +6,23 @@ import threading
 from threading import Thread
 import numpy as np
 from numpy_ringbuffer import RingBuffer
+from playsound import playsound 
 
 
 #  Stores information about the audio environment
 class env:
-   curr_vol = RingBuffer(capacity=50, dtype=float)
+   curr_vol = RingBuffer(capacity=100, dtype=float)
    init_duration = 5000 #in milliseconds
    ambient = 0.0
    frames=[]
    start_hyperparameter=2 # the bigger the hyperparameter, the louder the env has to be to start
    stop_hyperparameter=0.25 # the bigger the hyperparameter, louder it will be to stop
+
+   # pyaudio config
+   chunk = 1024
+   FORMAT = pyaudio.paInt16
+   channels = 1 # mono, change to 2 if you want stereo
+   sample_rate = 16000
 
    def get_vol():
       return mean(env.curr_vol)
@@ -41,69 +48,62 @@ class env:
 
 def record_finish(event):
    filename = "Assets/recorded.wav"
-   chunk = 1024
-   FORMAT = pyaudio.paInt16
-   channels = 1
-   sample_rate = 16000
-   record_seconds = 5 # max length
+   record_seconds = 3 # max length
    p = pyaudio.PyAudio()
    # open stream object as input & output
-   stream = p.open(format=FORMAT,
-                   channels=channels,
-                   rate=sample_rate,
+   stream = p.open(format=env.FORMAT,
+                   channels=env.channels,
+                   rate=env.sample_rate,
                    input=True,
                    output=True,
-                   frames_per_buffer=chunk)
+                   frames_per_buffer=env.chunk)
    frames = env.frames
-   for i in range(int(16000 / chunk * record_seconds)):
+   for i in range(int(env.sample_rate / env.chunk * record_seconds)):
       if event.is_set():
-            break
-      data = stream.read(chunk)
+         break
+      data = stream.read(env.chunk)
       frames.append(data)
+      print("appending frames")
    stream.stop_stream()
    stream.close()
    p.terminate()
    wf = wave.open(filename, "wb")
-   wf.setnchannels(channels)
-   wf.setsampwidth(p.get_sample_size(FORMAT))
-   wf.setframerate(sample_rate)
+   wf.setnchannels(env.channels)
+   wf.setsampwidth(p.get_sample_size(env.FORMAT))
+   wf.setframerate(env.sample_rate)
    wf.writeframes(b"".join(frames))
    wf.close()
    print("finished recording")       
 
 
-def record_intermed(bf_stop):
+def record_background(stop_signal):
    frames = []
    while(True):
-      chunk = 1024
-      FORMAT = pyaudio.paInt16
-      channels = 1 # mono, change to 2 if you want stereo
-      sample_rate = 16000
-      record_seconds = 10
+      record_seconds = 5
       p = pyaudio.PyAudio()
-      stream = p.open(format=FORMAT,
-                     channels=channels,
-                     rate=sample_rate,
+      stream = p.open(format=env.FORMAT,
+                     channels=env.channels,
+                     rate=env.sample_rate,
                      input=True,
                      output=True,
-                     frames_per_buffer=chunk)
+                     frames_per_buffer=env.chunk)
       
-      for i in range(int(16000 / chunk * record_seconds)):
-         data = stream.read(chunk)
+      for i in range(int(env.sample_rate / env.chunk * record_seconds)):
+         data = stream.read(env.chunk)
          frames.append(data)
       env.frames = frames 
 
       stream.stop_stream()
       stream.close()
       p.terminate()
-      if bf_stop.is_set():
+      if stop_signal.is_set():
          return
 
 
 
 def record_one_phrase():
    background_listener_stop = threading.Event()
-   background_listener = Thread(target=record_intermed, args=[background_listener_stop])
+   background_listener = Thread(target=record_background, args=[background_listener_stop])
    background_listener.setDaemon(True)
 
    currentlyRecording = False
@@ -113,13 +113,12 @@ def record_one_phrase():
 
    print(f'{env.ambient=}{env.get_vol()=}')
    while(True):
-      # print(f'{env.ambient=}{get_vol()=}')
 
-      env.set_vol(initialize=False, duration=10)
+      env.set_vol(duration=10)
 
       if env.valid_to_start() and not currentlyRecording:
          if background_listener.is_alive():
-            print("joining")
+            print("joining background thread")
             background_listener_stop.set()
          main_recorder = Thread(target=record_finish, args=[stop_event])
          
@@ -139,4 +138,7 @@ def record_one_phrase():
 if __name__== "__main__":
    env.set_vol(initialize=True)
    record_one_phrase()
+   import time
+   time.sleep(1)
+   playsound("Assets/recorded.wav")
 
