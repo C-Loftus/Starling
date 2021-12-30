@@ -1,0 +1,40 @@
+Time_before_break: 20 
+
+Model:
+- default: nvidia_nemo
+-
+  nvidia_nemo:
+    - model_path: "nvidia/stt_en_conformer_ctc_medium.nemo"
+    - pretrained_name: "stt_en_conformer_ctc_medium"
+    - cuda : -1
+    - audio_dir : "Assets/"
+    - audio_type : "wav"
+    - batch_size : 128
+
+Alphabet: 
+  - air       : "a" 
+  - bat       : "b" 
+  - cap       : "c" 
+  - drum      : "d" 
+  - each      : "e" 
+  - fine      : "f" 
+  - gust      : "g" 
+  - harp      : "h" 
+  - sit       : "i" 
+  - jury      : "j" 
+  - crunch    : "k" 
+  - look      : "l" 
+  - made      : "m" 
+  - near      : "n" 
+  - odd       : "o" 
+  - pit       : "p" 
+  - quench    : "q" 
+  - red       : "r" 
+  - sun       : "s" 
+  - trap      : "t" 
+  - urge      : "u" 
+  - vest      : "v" 
+  - whale     : "w" 
+  - plex      : "x" 
+  - yank      : "y" 
+  - zip       : "z"    
