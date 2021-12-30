@@ -28,6 +28,7 @@ class application_config:
         TranscriptionConfig.audio_dir = "Assets/"
         TranscriptionConfig.audio_type = "wav"
         TranscriptionConfig.batch_size=32
+        TranscriptionConfig.overwrite_transcripts = True
 
 
 

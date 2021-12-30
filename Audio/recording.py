@@ -119,6 +119,7 @@ def record_one_phrase():
          if background_listener.is_alive():
             print("joining background thread")
             background_listener_stop.set()
+            # background_listener.join() # causes to return {} ?
          frames = q.get()
          main_recorder = Thread(target=record_finish, args=[stop_event, frames])
          
@@ -130,6 +131,7 @@ def record_one_phrase():
          # send signal to stop
          print("stopping recording thread. *************** Finished Word")
          stop_event.set()
+         main_recorder.join()
          currentlyRecording = False
          return
       
