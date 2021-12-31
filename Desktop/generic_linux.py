@@ -1,5 +1,3 @@
-from pynput import keyboard, mouse
- 
  # echo Hello | osd_cat -p bottom -A center -o -80
 
 # sudo apt install libxosd2 xosd-bin
@@ -10,16 +8,14 @@ from pynput import keyboard, mouse
 import os
 from threading import Thread
 
-def screen_print(message, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*"):
+def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*"):
 
     thread = Thread(target=os.system, \
-        args=("echo {} | osd_cat \
+        args=("echo {} | osd_cat --delay={} \
              -A center --pos bottom --color white -u transparent -f {}"
-             .format(message, font),)
+             .format(message, delay, font),)
         )
     thread.start()
-
-    return thread
 
 # detect how long user has been working on the keyboard
 def detect_time_for_break(min_until_break):

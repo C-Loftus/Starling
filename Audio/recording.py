@@ -31,10 +31,10 @@ class env:
    def valid_to_stop(hyperparamVolume = 2):
       return (env.get_vol() < (env.ambient + env.stop_hyperparameter))
 
-   def set_vol(initialize=False, duration=init_duration):
+   def set_vol(initialize=False, sample_duration=init_duration):
       stream = sd.InputStream(callback=env._audio_callback)
       with stream:
-         sd.sleep(duration)  
+         sd.sleep(sample_duration)  
       if initialize:      
          env.ambient = env.get_vol()
 
@@ -114,7 +114,7 @@ def record_one_phrase():
 
    while(True):
 
-      env.set_vol(duration=10)
+      env.set_vol(sample_duration=10)
 
       if env.valid_to_start() and not currentlyRecording:
          print(f'{env.ambient=:.5f} {env.get_vol()=:.5f}')
