@@ -1,25 +1,22 @@
-from torch.cuda import init
-from Desktop.generic_linux import screen_print, handle_transcription, run_command, run_dictation, run_shell
+from Desktop.generic_linux import screen_print, detect_time_for_break
 from Desktop.gnome import *
+from Desktop.keyPress import handle_transcription, mode
 from Audio.recording import *
 from nvidia.transcribe_speech import *
 from setup_conf import application_config
 
-
-import enum
-
-class mode(enum.Enum):
-    COMMAND = 1
-    DICTATION = 2
-    SHELL = 3
-
 # Parses the config and  normalizes audio to the ambient env volume
 def init_conf_and_env():
     screen_print("Initializing...", delay=6)
+
     env.set_vol(initialize=True)
+    
     config_path = "config.yaml"
-    application_config(config_path)
+    app_conf = application_config(config_path)
+    detect_time_for_break(app_conf.get_time_before_break())
+
     nemo = init_transcribe_conf(TranscriptionConfig)
+
     screen_print("Initialization complete")
     return nemo[0], nemo[1], nemo[2], nemo[3]
     
@@ -28,7 +25,7 @@ def main():
 
     TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE = init_conf_and_env()
 
-    status = mode.COMMAND
+    current_mode = mode.COMMAND
 
     while True:
         print("mainthread")
@@ -37,7 +34,7 @@ def main():
         print(transcriptions)
         screen_print(transcriptions)
         # playsound("Assets/recorded.wav")
-        handle_transcription(transcriptions, status)
+        current_mode = handle_transcription(transcriptions, current_mode)
 
 
 

@@ -20,6 +20,12 @@ class application_config:
     def get_config(self):
         return self.config
 
+    def get_time_before_break(self):
+        return self.time_before_break
+
+    def get_alphabet(self):
+        return self.alphabet
+
     #  user shouldn't need to change this. all is handled automatically
     def _load_transcription_config(self):
         TranscriptionConfig.model_path = "nvidia/stt_en_conformer_ctc_medium.nemo"

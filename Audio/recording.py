@@ -15,7 +15,7 @@ class env:
    init_duration = 5000 #in milliseconds
    ambient = 0.0
    start_hyperparameter=3 # the bigger the hyperparameter, the louder the env has to be to start
-   stop_hyperparameter=0.25 # the bigger the hyperparameter, louder it will be to stop
+   stop_hyperparameter=0.25 # the bigger the hyperparameter, the less noise needed to stop
 
    # pyaudio config
    chunk = 1024

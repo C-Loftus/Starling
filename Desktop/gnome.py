@@ -30,14 +30,13 @@ def make_gnome_timer(lock, title=None, message=None, extra=None, seconds=None):
     p.start()
     return p
 
-def default_timer_conf():
+def default_timer_conf(minutes=5):
     timer_lock = Lock()
-    seconds = 60 * 5
-    message, extra, = None, None
     if len(sys.argv) > 1:
         minutes = sys.argv[1]
-        seconds = int(minutes) * 60
-
+    seconds = 60 * minutes
+    message, extra, = None, None
+    
     while True:
         for i in range(0,2):
             if i == 1:
@@ -49,9 +48,7 @@ def default_timer_conf():
                 meesage= "Timer for {} minutes".format(minutes)
                 extra = "timer"
             p = make_gnome_timer(timer_lock, title="Timer", message=message, extra=extra, seconds=seconds)
-            print("change")
             p.join()
-
 
 if __name__ == "__main__":
     default_timer_conf()
