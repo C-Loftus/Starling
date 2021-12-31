@@ -1,9 +1,17 @@
 from torch.cuda import init
-from Desktop.generic_linux import screen_print
+from Desktop.generic_linux import screen_print, handle_transcription, run_command, run_dictation, run_shell
 from Desktop.gnome import *
 from Audio.recording import *
 from nvidia.transcribe_speech import *
 from setup_conf import application_config
+
+
+import enum
+
+class mode(enum.Enum):
+    COMMAND = 1
+    DICTATION = 2
+    SHELL = 3
 
 # Parses the config and  normalizes audio to the ambient env volume
 def init_conf_and_env():
@@ -20,18 +28,17 @@ def main():
 
     TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE = init_conf_and_env()
 
+    status = mode.COMMAND
+
     while True:
         print("mainthread")
         record_one_phrase()
         transcriptions = run_inference(TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE)
         print(transcriptions)
-        # <class 'list'> = transcriptions
         screen_print(transcriptions)
-        print(type(transcriptions))
         # playsound("Assets/recorded.wav")
-        if 'time' in transcriptions:
-            default_timer_conf()
-        # os.remove("Assets/recorded.wav")
+        handle_transcription(transcriptions, status)
+
 
 
 if __name__ == '__main__':
