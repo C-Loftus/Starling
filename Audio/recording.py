@@ -14,7 +14,7 @@ class env:
    curr_vol = RingBuffer(capacity=100, dtype=float)
    init_duration = 5000 #in milliseconds
    ambient = 0.0
-   start_hyperparameter=2 # the bigger the hyperparameter, the louder the env has to be to start
+   start_hyperparameter=3 # the bigger the hyperparameter, the louder the env has to be to start
    stop_hyperparameter=0.25 # the bigger the hyperparameter, louder it will be to stop
 
    # pyaudio config
@@ -110,12 +110,15 @@ def record_one_phrase():
 
    background_listener.start()
 
-   print(f'{env.ambient=}{env.get_vol()=}')
+   print(f'{env.ambient=:.5f} {env.get_vol()=:.5f}')
+
    while(True):
 
       env.set_vol(duration=10)
 
       if env.valid_to_start() and not currentlyRecording:
+         print(f'{env.ambient=:.5f} {env.get_vol()=:.5f}')
+             
          if background_listener.is_alive():
             print("joining background thread")
             background_listener_stop.set()
