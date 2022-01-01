@@ -34,6 +34,8 @@ def main():
         print(transcriptions)
         screen_print(transcriptions)
         # playsound("Assets/recorded.wav")
+
+        # all mode switching, gui, and keyboard automation code is handlded here
         current_mode = handle_transcription(transcriptions, current_mode)
 
 
