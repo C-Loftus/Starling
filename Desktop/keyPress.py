@@ -7,15 +7,11 @@ from typing import List
 
 from torch.cuda import current_device
 
-
 class mode(enum.Enum):
     COMMAND = 1
     DICTATION = 2
     SHELL = 3
     SLEEP = 4
-
-
-
 
 def handle_transcription(transcription, current_mode):
     # Only use the first index since we are only parsing one wav file
@@ -109,58 +105,73 @@ def _run_shell(transcription, safety_time=10):
         subprocess.call([shell, '-i', '-c', transcription])
          
 
-# This has to be wrapped in a process because alert is blocking
+# Wrapper needed because alert is blocking
 def _alert_wrapper(message, q):
     result = pyautogui.alert(text=message, title='Safety Check Shell Command', button='CANCEL')
     q.put(result)
 
 def _run_command(transcription, alphabet):
+    result = _parse_command(transcription, alphabet)
+    KEY_INDEX = 0
+    DESCRIPTION_INDEX = 1
+
+    for command in result:
+        for key in command:
+            if key[DESCRIPTION_INDEX] == 'modifier' or key[DESCRIPTION_INDEX] == 'alphabet':
+                pyautogui.keyDown(key[KEY_INDEX])
+
+def _parse_command(transcription, alphabet):
+
     '''
     Command Format:
-
-    (modifiers)* (alphabet)* || (focus/close/open) (editor/terminal/browser)
-    
+    ((modifiers)* (alphabet)*) || ((focus/close/open) (editor/terminal/browser))
     '''
 
     modifiers = {'ctrl', 'alt', 'shift', 'super'}
     window_actions = {'focus', 'open', 'close'}
     applications = {'editor', 'terminal', 'browser'}
     
-    cmdList: List[str] = []
-    currentCmd = []
+    cmdList: List[List[str]] = []
+    currCmd: List[(str, str)] = []
 
-    currCmdHasAction = False
-
-    for word in transcription:
-
+    for index, word in enumerate(transcription.split()):
 
         # modifiers only begin cmds or follow other modifiers
         if word in modifiers:
-            lastTerm = currentCmd[-1]
-            if lastTerm not in modifiers:
-                cmdList.append(currentCmd)
-                currentCmd = [word]
-            if lastTerm in modifiers:
-                currentCmd.append(word)
+            try:
+                lastTerm = currCmd[-1]
+            except:
+                lastTerm = None
+
+            if (lastTerm is None or lastTerm not in modifiers) and index != 0:
+                cmdList.append(currCmd)
+                currCmd = []
+
+            currCmd.append((word, 'modifier'))
 
         # There can only be one cmd term for every cmd
         # i.e. it doesn't make sense to have 'close focus browser'
-        if word in window_actions:
-            if currCmdHasAction:
-                cmdList.append(currentCmd)
-                currCmdHasAction = False
-                currentCmd = [word]
+        # thus you always break it off to its own cmd
+        elif word in window_actions:
+            cmdList.append(currCmd)
+            currCmd = []
+            currCmd.append((word, 'action'))
 
-            else:
-                currCmdHasAction = True    
-                currentCmd.append(word)
-
-        
         elif word in alphabet:
-            currentCmd.append(alphabet[word])
+            currCmd.append((alphabet[word], 'alphabet'))
 
         elif word in applications:
-            currentCmd.append(word)
+            currCmd.append((word, 'application'))
+
+        # don't use unclassified words as cmds/key presses
+        else:
+            pass
+
+    # add last command to list. Not handled otherwise
+    if currCmd != []:
+        cmdList.append(currCmd)
+
+    return cmdList
 
 
 class command_list:
@@ -182,3 +193,6 @@ if __name__ == '__main__':
     # print(_run_dictation("command mode"))
     # print(_run_dictation("test command"))
     # _run_shell("echo test", safety_time=10)Hello world!
+    print(_parse_command("shift super b b b b c super", alphabet={"a": "a", "b": "b", "c": "c"}))
+    print(_parse_command("shift super b b focus editor focus alg", alphabet={"a": "a", "b": "b", "c": "c"}))
+

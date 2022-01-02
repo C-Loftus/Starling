@@ -14,8 +14,7 @@ class application_config:
                 self.alphabet = self.config['Alphabet']
                 self.time_before_break = self.config['Time_before_break']
             except yaml.YAMLError as exc:
-                print("Error in yaml syntax or naming", exc)
-                exit(1)
+                raise Exception("Error loading config file at {}".format(self.config_path))
 
     def get_config(self):
         return self.config
@@ -34,9 +33,6 @@ class application_config:
         TranscriptionConfig.audio_dir = "Assets/"
         TranscriptionConfig.audio_type = "wav"
         TranscriptionConfig.batch_size=32
-        # TranscriptionConfig.overwrite_transcripts = True
-
-
 
 if __name__ == '__main__':
     config_path = "config.yaml"
