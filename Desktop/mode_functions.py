@@ -4,6 +4,14 @@ import pyautogui
 import enum
 from typing import List
 
+# python hacky fix to import up a directory
+import os, sys
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+import setup_conf
+
+# entire application mode
 class mode(enum.Enum):
     COMMAND = 1
     DICTATION = 2
@@ -128,6 +136,7 @@ def _alert_wrapper(message, q):
 
 def _run_command(transcription, CONF):
     #  xdotool getwindowfocus getwindowname
+    #  sleep 3; ps -p $(xdotool getwindowpid $(xdotool getwindowfocus)) -o comm=
     p = subprocess.Popen(['xdotool', 'getwindowfocus', 'getwindowname'], stdout=subprocess.PIPE)
     context = p.stdout.read()
 
@@ -136,20 +145,35 @@ def _run_command(transcription, CONF):
     alphabet = CONF.get_alphabet()
     result = _parse_command(transcription, alphabet)
 
-    natural_command = ""
-
     for command in result:
 
-        for key in command:
-            if key[DESCRIPTION_INDEX] == category.NATURAL:
-                natural_command += key[KEY_INDEX]
+        final_key_list = []
+        natural_command = ""
+        do_natural_command = False
 
-            elif key[DESCRIPTION_INDEX] == 'modifier' or key[DESCRIPTION_INDEX] == 'alphabet':
-                pyautogui.keyDown(key[KEY_INDEX])
+        for key in command:
+            print(key)
+            if key[DESCRIPTION_INDEX] == category.NATURAL:
+                natural_command += (key[KEY_INDEX] + " ")
+                do_natural_command = True
+
+            elif key[DESCRIPTION_INDEX] == category.MODIFIER or key[DESCRIPTION_INDEX] == category.ALPHABET:
+                final_key_list.append(key[KEY_INDEX])
 
             if key[DESCRIPTION_INDEX] == "action":
                 if key[KEY_INDEX] == 'focus':
                     subprocess.call(['xdotool', 'search', '--class', 'kitty', 'windowactivate'])
+
+        if do_natural_command:
+            try:
+                decode_cmd = context_cmds[natural_command]
+                pyautogui.hotkey(*decode_cmd.split())
+            except:
+                print(f'Could not find natural command {natural_command} in context {context}')
+
+        else:
+            print("key list", final_key_list)
+            pyautogui.hotkey(*final_key_list)
                 
 def _parse_command(transcription, alphabet):
 
@@ -158,7 +182,7 @@ def _parse_command(transcription, alphabet):
     ((modifiers)* (alphabet)*) || ((focus/close/open) (editor/terminal/browser))
     '''
 
-    modifiers = {'ctrl', 'alt', 'shift', 'super'}
+    modifiers = {'ctrl', 'alt', 'shift', 'super', 'win'}
     window_actions = {'focus', 'open', 'close'}
     applications = {'editor', 'terminal', 'browser'}
     
@@ -178,7 +202,9 @@ def _parse_command(transcription, alphabet):
             if (lastTerm is None or lastTerm not in modifiers) and index != 0:
                 cmdList.append(currCmd)
                 currCmd = []
-
+            #pyauto gui only uses win not super
+            if word == 'super':
+                word = 'win'
             currCmd.append((word, category.MODIFIER))
 
         # There can only be one cmd term for every cmd
@@ -246,21 +272,11 @@ if __name__ == '__main__':
     print("\n")
     print(_parse_command("volume down super c volume up", alphabet={"a": "a", "b": "b", "c": "c"}))
 
-    import os, sys
-    # getting the name of the directory
-    # where the this file is present.
-    current = os.path.dirname(os.path.realpath(__file__))
-    
-    # Getting the parent directory name
-    # where the current directory is present.
-    parent = os.path.dirname(current)
-    
-    # adding the parent directory to 
-    # the sys.path.
-    sys.path.append(parent)
-    
-    import setup_conf
+
 
     CONF = setup_conf.application_config("config.yaml")
 
+    print(_parse_command("super cap", alphabet=CONF.get_alphabet()))
     _run_command("super cap", CONF=CONF)
+    _run_command("new bookmark", CONF=CONF)
+

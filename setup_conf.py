@@ -11,7 +11,12 @@ class application_config:
         with open(self.config_path) as file:
             try:
                 self.config = yaml.safe_load(file)
-                self.alphabet = self.config['alphabet']
+
+                alpha = {}
+                for dictionary in self.config['alphabet']:
+                    alpha.update(dictionary)
+
+                self.alphabet = alpha
                 self.time_before_break = self.config['time_before_break']
                 self.safety_time = self.config['shell_safety_duration']
 
@@ -58,4 +63,5 @@ class application_config:
 if __name__ == '__main__':
     config_path = "config.yaml"
     conf = application_config(config_path)
+    print(conf.get_alphabet())
     print(conf.get_browser_cmds())
