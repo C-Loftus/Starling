@@ -3,6 +3,11 @@ import subprocess
 import pyautogui
 import enum
 from typing import List
+import time
+import subprocess
+from multiprocessing import Process
+from os import environ
+from threading import Thread
 
 # python hacky fix to import up a directory
 import os, sys
@@ -89,11 +94,7 @@ def _run_shell(transcription, CONF):
     If you want convenience and safety, this may be better. 
     '''
 
-    import time
-    import subprocess
-    from multiprocessing import Process
-    from os import environ
-    from threading import Thread
+
 
     safety_time = CONF.get_safety_time()
 
@@ -261,22 +262,60 @@ class command_list:
 
 
 if __name__ == '__main__':
-    # print(_run_dictation("command mode"))
-    # print(_run_dictation("test command"))
-    # _run_shell("echo test", safety_time=10)Hello world!
-    print(_parse_command("shift super b b b b c super", alphabet={"a": "a", "b": "b", "c": "c"}))
-    print("\n")
-    print(_parse_command("shift super b b focus editor focus alg volume down", alphabet={"a": "a", "b": "b", "c": "c"}))
-    print("\n")
-    print(_parse_command("shift down super a editor escape a a shift b b", alphabet={"a": "a", "b": "b", "c": "c"}))
-    print("\n")
-    print(_parse_command("volume down super c volume up", alphabet={"a": "a", "b": "b", "c": "c"}))
+    # import gi
+    # gi.require_version('Wnck', '3.0')
+    # from gi.repository import Wnck
+    # screen = Wnck.screen_get_default()
+
+    # screen.force_update()
+    # window = screen.get_active_window()
+
+    # title = window.get_name()
+    # print(title)
+    from subprocess import *
+    import re
+
+    def test():
+        with subprocess.Popen(['xprop', '-root', '_NET_ACTIVE_WINDOW'], stdout=PIPE) as root:
+            for line in root.stdout:
+                line = str(line, encoding="UTF-8")
+
+                m = re.search('^_NET_ACTIVE_WINDOW.* ([\w]+)$', line)
+                if m is not None:
+                    id_ = m.group(1)
+                    with Popen(['xprop', '-id', id_, 'WM_NAME'],
+                            stdout=PIPE) as id_w:
+                        for line in id_w.stdout:
+                            line = str(line, encoding="UTF-8")
+                            match = re.match("WM_NAME\(\w+\) = \"(?P<name>.+)\"$",
+                                            line)
+                        if match is not None:
+                            return match.group("name")
+                    break
+        return "Active window not found"
+
+    import re
+    a = test()
+    a.strip()
+
+    print(re.split('- |_  |— |\*|\n',a)[-1])
+    
+    # # print(_run_dictation("command mode"))
+    # # print(_run_dictation("test command"))
+    # # _run_shell("echo test", safety_time=10)Hello world!
+    # print(_parse_command("shift super b b b b c super", alphabet={"a": "a", "b": "b", "c": "c"}))
+    # print("\n")
+    # print(_parse_command("shift super b b focus editor focus alg volume down", alphabet={"a": "a", "b": "b", "c": "c"}))
+    # print("\n")
+    # print(_parse_command("shift down super a editor escape a a shift b b", alphabet={"a": "a", "b": "b", "c": "c"}))
+    # print("\n")
+    # print(_parse_command("volume down super c volume up", alphabet={"a": "a", "b": "b", "c": "c"}))
 
 
 
-    CONF = setup_conf.application_config("config.yaml")
+    # CONF = setup_conf.application_config("config.yaml")
 
-    print(_parse_command("super cap", alphabet=CONF.get_alphabet()))
-    _run_command("super cap", CONF=CONF)
-    _run_command("new bookmark", CONF=CONF)
+    # print(_parse_command("super cap", alphabet=CONF.get_alphabet()))
+    # _run_command("super cap", CONF=CONF)
+    # _run_command("new bookmark", CONF=CONF)
 
