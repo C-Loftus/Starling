@@ -11,8 +11,16 @@ class application_config:
         with open(self.config_path) as file:
             try:
                 self.config = yaml.safe_load(file)
-                self.alphabet = self.config['Alphabet']
-                self.time_before_break = self.config['Time_before_break']
+                self.alphabet = self.config['alphabet']
+                self.time_before_break = self.config['time_before_break']
+                self.safety_time = self.config['shell_safety_duration']
+
+                self.browser = self.config['browser']
+                self.browser_cmds = self.config[self.browser]
+
+                self.editor = self.config['editor']
+                self.terminal = self.config['terminal']
+
             except yaml.YAMLError as exc:
                 raise Exception("Error loading config file at {}".format(self.config_path))
 
@@ -24,6 +32,19 @@ class application_config:
 
     def get_alphabet(self):
         return self.alphabet
+
+    def get_safety_time(self):
+        return self.safety_time()
+
+    def get_browser_cmds(self):
+        return self.browser_cmds
+
+    def try_get_context(self, context: str):
+        try:
+            return self.config[context]
+        except:
+            return None
+
 
     #  user shouldn't need to change this. all is handled automatically
     def _load_transcription_config(self):
@@ -37,4 +58,4 @@ class application_config:
 if __name__ == '__main__':
     config_path = "config.yaml"
     conf = application_config(config_path)
-    print(conf.get_config()["Alphabet"])
+    print(conf.get_browser_cmds())

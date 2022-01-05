@@ -1,6 +1,7 @@
+from sounddevice import sleep
 from Desktop.generic_linux import screen_print, detect_time_for_break
 from Desktop.gnome import *
-from Desktop.keyPress import handle_transcription, mode
+from Desktop.mode_functions import handle_transcription, mode
 from Audio.recording import *
 from nvidia.transcribe_speech import *
 from setup_conf import application_config
@@ -18,12 +19,12 @@ def init_conf_and_env():
     nemo = init_transcribe_conf(TranscriptionConfig)
 
     screen_print("Initialization complete")
-    return nemo[0], nemo[1], nemo[2], nemo[3]
+    return nemo[0], nemo[1], nemo[2], nemo[3], app_conf
     
 
 def main():
 
-    TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE = init_conf_and_env()
+    TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE, CONF = init_conf_and_env()
 
     current_mode = mode.COMMAND
 
@@ -32,12 +33,12 @@ def main():
         record_one_phrase()
         transcriptions = run_inference(TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE)
         print(transcriptions)
-        screen_print(transcriptions)
+        if current_mode is not mode.SLEEP:
+            screen_print(transcriptions)
         # playsound("Assets/recorded.wav")
 
         # all mode switching, gui, and keyboard automation code is handlded here
-        current_mode = handle_transcription(transcriptions, current_mode)
-
+        current_mode = handle_transcription(transcriptions, current_mode, CONF)
 
 
 if __name__ == '__main__':
