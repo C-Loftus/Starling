@@ -21,7 +21,13 @@ class application_config:
                 self.safety_time = self.config['shell_safety_duration']
 
                 self.browser = self.config['browser']
-                self.browser_cmds = self.config[self.browser]
+
+                web = {}
+                for dictionary in self.config[self.browser]:
+                    print(dictionary)
+                    web.update(dictionary)
+
+                self.browser_cmds = web
 
                 self.editor = self.config['editor']
                 self.terminal = self.config['terminal']
@@ -44,12 +50,10 @@ class application_config:
     def get_browser_cmds(self):
         return self.browser_cmds
 
-    def try_get_context(self, context: str):
-        try:
-            return self.config[context]
-        except:
-            return None
-
+    def get_context(self, context: str):
+        from collections import ChainMap
+        return dict(ChainMap(*self.config[context]))
+        
 
     #  user shouldn't need to change this. all is handled automatically
     def _load_transcription_config(self):
@@ -64,4 +68,5 @@ if __name__ == '__main__':
     config_path = "config.yaml"
     conf = application_config(config_path)
     print(conf.get_alphabet())
-    print(conf.get_browser_cmds())
+    print(conf.get_browser_cmds())    
+    print(conf.get_context('Mozilla Firefox'))

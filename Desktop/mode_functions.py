@@ -94,8 +94,6 @@ def _run_shell(transcription, CONF):
     If you want convenience and safety, this may be better. 
     '''
 
-
-
     safety_time = CONF.get_safety_time()
 
     shell = environ['SHELL']
@@ -138,10 +136,11 @@ def _alert_wrapper(message, q):
 def _run_command(transcription, CONF):
     #  xdotool getwindowfocus getwindowname
     #  sleep 3; ps -p $(xdotool getwindowpid $(xdotool getwindowfocus)) -o comm=
-    p = subprocess.Popen(['xdotool', 'getwindowfocus', 'getwindowname'], stdout=subprocess.PIPE)
-    context = p.stdout.read()
 
-    context_cmds = CONF.try_get_context(context)
+    context = get_focused_window_name()
+    context_cmds = CONF.get_context(context)
+    print(context_cmds, context, CONF.config[context])
+
 
     alphabet = CONF.get_alphabet()
     result = _parse_command(transcription, alphabet)
@@ -155,7 +154,10 @@ def _run_command(transcription, CONF):
         for key in command:
             print(key)
             if key[DESCRIPTION_INDEX] == category.NATURAL:
-                natural_command += (key[KEY_INDEX] + " ")
+                natural_command += (key[KEY_INDEX])
+
+                natural_command += " "
+
                 do_natural_command = True
 
             elif key[DESCRIPTION_INDEX] == category.MODIFIER or key[DESCRIPTION_INDEX] == category.ALPHABET:
@@ -165,12 +167,13 @@ def _run_command(transcription, CONF):
                 if key[KEY_INDEX] == 'focus':
                     subprocess.call(['xdotool', 'search', '--class', 'kitty', 'windowactivate'])
 
+        natural_command = natural_command.strip()
+
         if do_natural_command:
-            try:
-                decode_cmd = context_cmds[natural_command]
-                pyautogui.hotkey(*decode_cmd.split())
-            except:
-                print(f'Could not find natural command {natural_command} in context {context}')
+            decode_cmd = context_cmds[natural_command]
+            pyautogui.hotkey(*decode_cmd.split())
+            # except:
+            #     print(f'Could not find natural command \'{natural_command}\' in context {context}')
 
         else:
             print("key list", final_key_list)
@@ -246,45 +249,19 @@ def _parse_command(transcription, alphabet):
     return cmdList
 
 
-class command_list:
-    current_command = []
-    command_list = []
-
-    def __init__(self):
-        return
-
-    def add_to_current_command(self, command: str):
-        self.current_command.append(command)  
-
-    def finish_this_command(self, command: str):
-        self.command_list.append(command)
-        self.current_command = []
-
-
-if __name__ == '__main__':
-    # import gi
-    # gi.require_version('Wnck', '3.0')
-    # from gi.repository import Wnck
-    # screen = Wnck.screen_get_default()
-
-    # screen.force_update()
-    # window = screen.get_active_window()
-
-    # title = window.get_name()
-    # print(title)
-    from subprocess import *
+def get_focused_window_name():
     import re
 
-    def test():
-        with subprocess.Popen(['xprop', '-root', '_NET_ACTIVE_WINDOW'], stdout=PIPE) as root:
+    def xprop():
+        with subprocess.Popen(['xprop', '-root', '_NET_ACTIVE_WINDOW'], stdout=subprocess.PIPE) as root:
             for line in root.stdout:
                 line = str(line, encoding="UTF-8")
 
                 m = re.search('^_NET_ACTIVE_WINDOW.* ([\w]+)$', line)
                 if m is not None:
                     id_ = m.group(1)
-                    with Popen(['xprop', '-id', id_, 'WM_NAME'],
-                            stdout=PIPE) as id_w:
+                    with subprocess.Popen(['xprop', '-id', id_, 'WM_NAME'],
+                            stdout=subprocess.PIPE) as id_w:
                         for line in id_w.stdout:
                             line = str(line, encoding="UTF-8")
                             match = re.match("WM_NAME\(\w+\) = \"(?P<name>.+)\"$",
@@ -292,14 +269,23 @@ if __name__ == '__main__':
                         if match is not None:
                             return match.group("name")
                     break
-        return "Active window not found"
+        return None
 
-    import re
-    a = test()
-    a.strip()
+    output = xprop()
 
-    print(re.split('- |_  |— |\*|\n',a)[-1])
-    
+    try: 
+        output.strip()
+        output = (re.split('- |_  |— |\*|\n',output)[-1])
+    except:
+        output = ""
+    return output
+
+
+
+
+
+if __name__ == '__main__':
+
     # # print(_run_dictation("command mode"))
     # # print(_run_dictation("test command"))
     # # _run_shell("echo test", safety_time=10)Hello world!
@@ -312,10 +298,10 @@ if __name__ == '__main__':
     # print(_parse_command("volume down super c volume up", alphabet={"a": "a", "b": "b", "c": "c"}))
 
 
-
-    # CONF = setup_conf.application_config("config.yaml")
+    print(get_focused_window_name())
+    CONF = setup_conf.application_config("config.yaml")
 
     # print(_parse_command("super cap", alphabet=CONF.get_alphabet()))
     # _run_command("super cap", CONF=CONF)
-    # _run_command("new bookmark", CONF=CONF)
+    _run_command("new bookmark", CONF=CONF)
 
