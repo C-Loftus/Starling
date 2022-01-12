@@ -2,7 +2,7 @@ import multiprocessing
 import subprocess
 import pyautogui
 import enum
-from typing import List
+from typing import List, final
 import time
 import subprocess
 from multiprocessing import Process
@@ -133,52 +133,54 @@ def _alert_wrapper(message, q):
     result = pyautogui.alert(text=message, title='Safety Check Shell Command', button='CANCEL')
     q.put(result)
 
+# gets it into the format for pyautogui
+def _join_cmd_words(cmd_words):
+    WORD_INDEX = 0
+    ACTION_INDEX = 1
+    if cmd_words[0][ACTION_INDEX] == category.NATURAL:
+        result = ""
+        for word in cmd_words:
+            result += word[WORD_INDEX] + " "
+        return result.strip()
+    else:
+        result = []
+        for word in cmd_words:
+            result.append(word[WORD_INDEX])
+        return result
+        
+
 def _run_command(transcription, CONF):
-    #  xdotool getwindowfocus getwindowname
-    #  sleep 3; ps -p $(xdotool getwindowpid $(xdotool getwindowfocus)) -o comm=
 
     context = get_focused_window_name()
-    context_cmds = CONF.get_context(context)
-    print(context_cmds, context, CONF.config[context])
-
+    context_cmds = CONF.get_context_cmds(context)
 
     alphabet = CONF.get_alphabet()
     result = _parse_command(transcription, alphabet)
 
+    ACTION_INDEX = 1
+
     for command in result:
+        print("running", command)
+        # first index enough to tell type of full cmd
+        typeOfAction = command[0][ACTION_INDEX]
 
-        final_key_list = []
-        natural_command = ""
-        do_natural_command = False
+        final_cmd = _join_cmd_words(command)
 
-        for key in command:
-            print(key)
-            if key[DESCRIPTION_INDEX] == category.NATURAL:
-                natural_command += (key[KEY_INDEX])
+        if typeOfAction == category.NATURAL:
+            try:
+                decode_cmd = context_cmds[final_cmd]
+                pyautogui.hotkey(*decode_cmd.split())
+            except:
+                print(f'Could not find natural command \'{command}\'\
+                in context {context} with commands {context_cmds}')
+        
+        elif typeOfAction == category.ACTION:
+            pass
 
-                natural_command += " "
+        elif typeOfAction == category.ALPHABET or typeOfAction == category.MODIFIER:
+            pyautogui.hotkey(*final_cmd)
 
-                do_natural_command = True
 
-            elif key[DESCRIPTION_INDEX] == category.MODIFIER or key[DESCRIPTION_INDEX] == category.ALPHABET:
-                final_key_list.append(key[KEY_INDEX])
-
-            if key[DESCRIPTION_INDEX] == "action":
-                if key[KEY_INDEX] == 'focus':
-                    subprocess.call(['xdotool', 'search', '--class', 'kitty', 'windowactivate'])
-
-        natural_command = natural_command.strip()
-
-        if do_natural_command:
-            decode_cmd = context_cmds[natural_command]
-            pyautogui.hotkey(*decode_cmd.split())
-            # except:
-            #     print(f'Could not find natural command \'{natural_command}\' in context {context}')
-
-        else:
-            print("key list", final_key_list)
-            pyautogui.hotkey(*final_key_list)
-                
 def _parse_command(transcription, alphabet):
 
     '''
@@ -209,6 +211,7 @@ def _parse_command(transcription, alphabet):
             #pyauto gui only uses win not super
             if word == 'super':
                 word = 'win'
+
             currCmd.append((word, category.MODIFIER))
 
         # There can only be one cmd term for every cmd
@@ -253,8 +256,8 @@ def get_focused_window_name():
     import re
 
     def xprop():
-        with subprocess.Popen(['xprop', '-root', '_NET_ACTIVE_WINDOW'], stdout=subprocess.PIPE) as root:
-            for line in root.stdout:
+        with subprocess.Popen(['xprop', '-root', '_NET_ACTIVE_WINDOW'], stdout=subprocess.PIPE) as toplevel:
+            for line in toplevel.stdout:
                 line = str(line, encoding="UTF-8")
 
                 m = re.search('^_NET_ACTIVE_WINDOW.* ([\w]+)$', line)
@@ -278,6 +281,7 @@ def get_focused_window_name():
         output = (re.split('- |_  |— |\*|\n',output)[-1])
     except:
         output = ""
+        
     return output
 
 
@@ -303,5 +307,5 @@ if __name__ == '__main__':
 
     # print(_parse_command("super cap", alphabet=CONF.get_alphabet()))
     # _run_command("super cap", CONF=CONF)
-    _run_command("new bookmark", CONF=CONF)
+    _run_command("new bookmark super cap", CONF=CONF)
 

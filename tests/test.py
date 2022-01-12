@@ -6,7 +6,6 @@
 
 import os
 import signal
-import json
 import subprocess
 
 import gi
@@ -25,19 +24,33 @@ APPINDICATOR_ID = 'scriptindicator'
 # https://commons.wikimedia.org/wiki/File:Red_x.svg
 
 # / https://commons.wikimedia.org/wiki/File:Eo_circle_green_blank.svg
-def main():
-    indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath('red.svg'), appindicator.IndicatorCategory.SYSTEM_SERVICES)
+def main(break_time):
+    import time
+    indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath('Assets/green.svg'), appindicator.IndicatorCategory.SYSTEM_SERVICES)
     indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
-    indicator.set_menu(build_menu())
+    indicator.set_menu(build_menu(break_time))
     notify.init(APPINDICATOR_ID)
-    gtk.main()
+    # indicator.set_icon(os.path.abspath('Assets/red.svg'))
 
-def build_menu():
+# /https://stackoverflow.com/questions/8826523/gtk-main-and-unix-sockets
+    return gtk.main()
+
+def build_menu(break_time):
     menu = gtk.Menu()
 
     item_script = gtk.MenuItem('script')
     item_script.connect('activate', script)
+
     menu.append(item_script)
+
+    enable = gtk.MenuItem('enable auto break timer')
+    enable.connect('activate', script)
+    menu.append(enable)
+
+    disable = gtk.MenuItem('disable auto break timer')
+    disable.connect('activate', script)
+    menu.append(disable)
+
 
     item_quit1 = gtk.MenuItem('Quit')
     item_quit1.connect('activate', quit1)
@@ -45,9 +58,6 @@ def build_menu():
 
     menu.show_all()
     return menu
-
-def fetch_joke():
-    return "test"
 
 def script(_):
     subprocess.call("echo test", shell=True)
@@ -59,4 +69,4 @@ def quit1(_):
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    main()
+    indc = main(5)

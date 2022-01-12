@@ -15,6 +15,9 @@ Mozilla Firefox:
 - new bookmark: "ctrl d"
 - search bar: "ctrl j"
 
+Visual Studio Code:
+- new command: "ctrl shift p"
+
 
 model:
 - default: nvidia_nemo

@@ -21,13 +21,14 @@ def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*"):
 def detect_time_for_break(min_until_break):
     from datetime import time, datetime
     import time as t
+    seconds_until_break = min_until_break * 60
 
     def idle_time():
         #xprintidle
         import subprocess
         p = subprocess.Popen(["xprintidle"], stdout=subprocess.PIPE)
         out = p.stdout.read()
-        return int(out)
+        return float(out) / 1000 / 60
 
     def work_time():
         time = 0
@@ -38,11 +39,14 @@ def detect_time_for_break(min_until_break):
             # 5 min in milliseconds
             # If this is true then that means the user took a break 
             # and thus don't need to take another one
-            print(idle_time())
-            if idle_time() > 300000:
+
+            # round to 4 decimal places
+            print(f'Idle time = {round(idle_time(), 4)} minutes')
+
+            if idle_time() > 5.0:
                 time = 0
                 print("break detected")
-            elif (time / 60) > (min_until_break):
+            elif (time) > (seconds_until_break):
                 screen_print("Time to take a break!")
 
     thread = Thread(target=work_time)
@@ -52,6 +56,8 @@ def detect_time_for_break(min_until_break):
 
 
 if __name__ == '__main__':
-    screen_print('Hello')
-    detect_time_for_break(1)
-    print("mainthread")
+    from time import gmtime, strftime
+    print (strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    screen_print("Starting", delay=10)
+    print("starting")
+    detect_time_for_break(10)

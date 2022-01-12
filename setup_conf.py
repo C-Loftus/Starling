@@ -1,5 +1,6 @@
 import yaml
 from nvidia.transcribe_speech import *
+from collections import ChainMap
 
 class application_config:
     def __init__(self, config_path):
@@ -50,8 +51,7 @@ class application_config:
     def get_browser_cmds(self):
         return self.browser_cmds
 
-    def get_context(self, context: str):
-        from collections import ChainMap
+    def get_context_cmds(self, context: str):
         return dict(ChainMap(*self.config[context]))
         
 
