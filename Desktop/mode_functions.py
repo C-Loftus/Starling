@@ -2,12 +2,13 @@ import multiprocessing
 import subprocess
 import pyautogui
 import enum
-from typing import List, final
+from typing import List
 import time
 import subprocess
 from multiprocessing import Process
 from os import environ
 from threading import Thread
+from X_window import *
 
 # python hacky fix to import up a directory
 import os, sys
@@ -16,7 +17,7 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 import setup_conf
 
-# entire application mode
+# current mode that the application is running in
 class mode(enum.Enum):
     COMMAND = 1
     DICTATION = 2
@@ -30,6 +31,14 @@ class category(enum.Enum):
     ACTION = 3
     NATURAL = 4
     APPLICATION = 5
+
+
+class x_window_actions(enum.Enum):
+    CLOSE = 1
+    MINIMIZE = 2
+    MAXIMIZE = 3
+    FOCUS = 4
+    OPEN = 5 # launch application
 
 KEY_INDEX = 0
 DESCRIPTION_INDEX = 1
@@ -189,7 +198,7 @@ def _parse_command(transcription, alphabet):
     '''
 
     modifiers = {'ctrl', 'alt', 'shift', 'super', 'win'}
-    window_actions = {'focus', 'open', 'close'}
+    window_actions = {'focus', 'open', 'close', 'maximize', 'minimize'}
     applications = {'editor', 'terminal', 'browser'}
     
     cmdList: List[List[str]] = []
@@ -250,41 +259,6 @@ def _parse_command(transcription, alphabet):
         cmdList.append(currCmd)
 
     return cmdList
-
-
-def get_focused_window_name():
-    import re
-
-    def xprop():
-        with subprocess.Popen(['xprop', '-root', '_NET_ACTIVE_WINDOW'], stdout=subprocess.PIPE) as toplevel:
-            for line in toplevel.stdout:
-                line = str(line, encoding="UTF-8")
-
-                m = re.search('^_NET_ACTIVE_WINDOW.* ([\w]+)$', line)
-                if m is not None:
-                    id_ = m.group(1)
-                    with subprocess.Popen(['xprop', '-id', id_, 'WM_NAME'],
-                            stdout=subprocess.PIPE) as id_w:
-                        for line in id_w.stdout:
-                            line = str(line, encoding="UTF-8")
-                            match = re.match("WM_NAME\(\w+\) = \"(?P<name>.+)\"$",
-                                            line)
-                        if match is not None:
-                            return match.group("name")
-                    break
-        return None
-
-    output = xprop()
-
-    try: 
-        output.strip()
-        output = (re.split('- |_  |— |\*|\n',output)[-1])
-    except:
-        output = ""
-        
-    return output
-
-
 
 
 
