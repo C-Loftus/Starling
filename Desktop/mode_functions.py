@@ -8,7 +8,7 @@ import subprocess
 from multiprocessing import Process
 from os import environ
 from threading import Thread
-from X_window import *
+import X_window
 
 # python way to import up a directory
 import os, sys
@@ -32,14 +32,6 @@ class category(enum.Enum):
     NATURAL = 4
     APPLICATION = 5
     NULL = 6
-
-
-class x_window_actions(enum.Enum):
-    CLOSE = 1
-    MINIMIZE = 2
-    MAXIMIZE = 3
-    FOCUS = 4
-    OPEN = 5 # launch application
 
 TERM_INDEX = 0
 DESCRIPTION_INDEX = 1
@@ -161,7 +153,7 @@ def _join_cmd_words(cmd_words):
 
 def _run_command(transcription, CONF):
 
-    context = get_focused_window_name()
+    context = X_window.get_focused_window_name()
     context_cmds = CONF.get_context_cmds(context)
 
     result: cmdList = _parse_command(transcription, CONF)
@@ -184,7 +176,7 @@ def _run_command(transcription, CONF):
                 in context {context} with commands {context_cmds}')
         
         elif typeOfAction == category.ACTION:
-            pass
+            _handle_action(final_cmd)
 
         elif typeOfAction == category.ALPHABET or typeOfAction == category.MODIFIER:
             print("pressing")
@@ -194,8 +186,35 @@ def _run_command(transcription, CONF):
             # just saying 'Chrome' doesn't mean anything. 
             # Must have an action before it
             pass
-        
 
+def _handle_action(final_command):
+    if len(final_command) > 2:
+        print("too many arguments")
+        return
+
+    action= final_command[0][TERM_INDEX]
+    application= final_command[1][TERM_INDEX]
+
+    print(f'action: {action} application: {application}')
+
+    
+    if application == "this":
+        application = X_window.get_focused_window_name()
+    
+    app_id=X_window.get_id_from_name(application)
+    print(f'app_id: {app_id} test, application: {application}')
+
+    if action == 'focus':
+        X_window.focus_window_by_id(app_id)
+    elif action == 'close':
+        X_window.close_window_by_id(app_id)
+    elif action == 'minimize':
+        X_window.minimize_window_by_id(app_id)
+    elif action == 'maximize':
+        X_window.maximize_window_by_id(app_id)
+    elif action == 'start':
+        # Start a process on the system
+        subprocess.call([application])
 
 class cmdList():
     def __init__(self):
@@ -235,8 +254,8 @@ def _parse_command(transcription, CONF):
     '''
 
     modifiers = {'ctrl', 'alt', 'shift', 'super', 'win'}
-    window_actions = {'focus', 'open', 'close', 'maximize', 'minimize'}
-    applications = {'editor', 'terminal', 'browser'}
+    window_actions = {'focus', 'start', 'close', 'maximize', 'minimize'}
+    applications = {'editor', 'terminal', 'browser', 'this'}
 
     alphabet = CONF.get_alphabet()
 
@@ -252,9 +271,8 @@ def _parse_command(transcription, CONF):
             if (previousDescription != category.MODIFIER) and index != 0:
                 cmd_list.finish_and_add_to_list()
             #pyauto gui only uses win not super
-            if word == 'super':
-                word = 'win'
-            cmd_list.add_to_curr_cmd(word, category.MODIFIER)
+            key = pyautogui_format(word)
+            cmd_list.add_to_curr_cmd(key, category.MODIFIER)
 
         # There can only be one cmd term for every cmd
         # i.e. it doesn't make sense to have 'close focus browser'
@@ -280,11 +298,15 @@ def _parse_command(transcription, CONF):
                 cmd_list.finish_and_add_to_list()
             cmd_list.add_to_curr_cmd(word, category.NATURAL)
 
+    # Ad last command at the end of loop
     cmd_list.finish_and_add_to_list()
 
     return cmd_list
 
-
+def pyautogui_format(word):
+    if word == 'super':
+        return 'win'
+    return word
 
 if __name__ == '__main__':
 
@@ -305,5 +327,9 @@ if __name__ == '__main__':
     # print(_parse_command("focus editor focus editor focus mozilla firefox focus super cap focus editor mozilla firefox", CONF).get_cmd_list())
     # print(_parse_command("super cap super bat", CONF).get_cmd_list())
 
-    _run_command("new bookmark super cap", CONF=CONF)
+    # _run_command("new bookmark super cap", CONF=CONF)
+
+    test = [("close", None),('disks', None)]
+    _handle_action(test)
+    print(X_window.get_focused_window_name())
 

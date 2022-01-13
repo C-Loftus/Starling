@@ -18,13 +18,28 @@ def close_window_by_id(id):
 
 def get_id_from_name(name):
     s = subprocess.Popen(['xdotool', 'search', '--onlyvisible', '--name', name], stdout=subprocess.PIPE)
-    return s.stdout.read().decode('utf-8').rstrip()
+    try:
+        return s.stdout.read().decode('utf-8').rstrip().split()[-1]
+    except:
+        return ""
 
 def get_focused_window_pid():
     # xdotool getactivewindow getwindowpid
     p = subprocess.Popen(['xdotool', 'getactivewindow', 'getwindowpid'], stdout=subprocess.PIPE)
-    pid = p.stdout.read().decode('utf-8')
+    pid = p.stdout.read().decode('utf-8{')
     return int(pid)
+
+def focus_window_by_id(id):
+    # xdotool windowactivate id
+    p = subprocess.Popen(['xdotool', 'windowactivate', id], stdout=subprocess.PIPE)
+
+def minimize_window_by_id(id):
+    # xdotool windowminimize id
+    p = subprocess.Popen(['xdotool', 'windowminimize', id], stdout=subprocess.PIPE)
+
+def maximize_window_by_id(id):
+    # xdotool windowmaximize id
+    p = subprocess.Popen(['xdotool', 'windowsize', id, '100%', '100%'], stdout=subprocess.PIPE)
 
 if __name__ == "__main__":
     from time import sleep

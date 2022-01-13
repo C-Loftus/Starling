@@ -60,4 +60,4 @@ if __name__ == '__main__':
     print (strftime("%Y-%m-%d %H:%M:%S", gmtime()))
     screen_print("Starting", delay=10)
     print("starting")
-    detect_time_for_break(10)
+    detect_time_for_break(30)
