@@ -1,8 +1,8 @@
 time_before_break: 20 #minutes
 shell_safety_duration: 5 #seconds
 
-editor: "vscode"
-terminal: "kitty"
+editor: "Visual Studio Code"
+terminal: "Kitty"
 browser: "Mozilla Firefox"
 
 #list of all keys

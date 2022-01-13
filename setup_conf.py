@@ -25,7 +25,6 @@ class application_config:
 
                 web = {}
                 for dictionary in self.config[self.browser]:
-                    print(dictionary)
                     web.update(dictionary)
 
                 self.browser_cmds = web

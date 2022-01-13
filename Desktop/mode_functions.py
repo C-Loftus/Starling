@@ -10,7 +10,7 @@ from os import environ
 from threading import Thread
 from X_window import *
 
-# python hacky fix to import up a directory
+# python way to import up a directory
 import os, sys
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -31,6 +31,7 @@ class category(enum.Enum):
     ACTION = 3
     NATURAL = 4
     APPLICATION = 5
+    NULL = 6
 
 
 class x_window_actions(enum.Enum):
@@ -40,7 +41,7 @@ class x_window_actions(enum.Enum):
     FOCUS = 4
     OPEN = 5 # launch application
 
-KEY_INDEX = 0
+TERM_INDEX = 0
 DESCRIPTION_INDEX = 1
 
 def handle_transcription(transcription, current_mode, CONF):
@@ -163,15 +164,14 @@ def _run_command(transcription, CONF):
     context = get_focused_window_name()
     context_cmds = CONF.get_context_cmds(context)
 
-    alphabet = CONF.get_alphabet()
-    result = _parse_command(transcription, alphabet)
+    result: cmdList = _parse_command(transcription, CONF)
 
-    ACTION_INDEX = 1
+    for command in result.get_cmd_list():
 
-    for command in result:
         print("running", command)
-        # first index enough to tell type of full cmd
-        typeOfAction = command[0][ACTION_INDEX]
+
+        # first term in command enough to tell type of full cmd
+        typeOfAction = command[0][DESCRIPTION_INDEX]
 
         final_cmd = _join_cmd_words(command)
 
@@ -187,10 +187,47 @@ def _run_command(transcription, CONF):
             pass
 
         elif typeOfAction == category.ALPHABET or typeOfAction == category.MODIFIER:
+            print("pressing")
             pyautogui.hotkey(*final_cmd)
+        else:
+            # ignore commands that start with applications.
+            # just saying 'Chrome' doesn't mean anything. 
+            # Must have an action before it
+            pass
+        
 
 
-def _parse_command(transcription, alphabet):
+class cmdList():
+    def __init__(self):
+        self.cmds: List[List] = []
+        self.curr_cmd: List = []
+
+        # self.only_words: List[List] = []
+        # self.curr_only_words: List = []
+
+    def add_to_curr_cmd(self, cmd, type):
+        self.curr_cmd.append((cmd, type))
+    
+    def finish_and_add_to_list(self):
+        if len(self.curr_cmd) > 0:
+            self.cmds.append(self.curr_cmd)
+            self.curr_cmd = []
+
+    def get_curr_cmd(self):
+        return self.curr_cmd
+
+    def get_cmd_list(self):
+        return self.cmds
+
+    def get_previous_element(self):
+        # previous element is the last one in the curr cmd
+        try:
+            return self.get_curr_cmd()[-1]
+        except:
+            return ("", category.NULL)
+
+
+def _parse_command(transcription, CONF):
 
     '''
     Command Format:
@@ -200,65 +237,52 @@ def _parse_command(transcription, alphabet):
     modifiers = {'ctrl', 'alt', 'shift', 'super', 'win'}
     window_actions = {'focus', 'open', 'close', 'maximize', 'minimize'}
     applications = {'editor', 'terminal', 'browser'}
-    
-    cmdList: List[List[str]] = []
-    currCmd: List[(str, str)] = []
+
+    alphabet = CONF.get_alphabet()
+
+    cmd_list = cmdList()
 
     for index, word in enumerate(transcription.split()):
 
-        try:
-            lastTerm = currCmd[-1]
-        except:
-            lastTerm = None
-
+        previousElement = cmd_list.get_previous_element()
+        previousDescription = previousElement[DESCRIPTION_INDEX]
+        
         # modifiers only begin cmds or follow other modifiers
         if word in modifiers:
-
-            if (lastTerm is None or lastTerm not in modifiers) and index != 0:
-                cmdList.append(currCmd)
-                currCmd = []
+            if (previousDescription != category.MODIFIER) and index != 0:
+                cmd_list.finish_and_add_to_list()
             #pyauto gui only uses win not super
             if word == 'super':
                 word = 'win'
-
-            currCmd.append((word, category.MODIFIER))
+            cmd_list.add_to_curr_cmd(word, category.MODIFIER)
 
         # There can only be one cmd term for every cmd
         # i.e. it doesn't make sense to have 'close focus browser'
         # thus you always break it off to its own cmd
         elif word in window_actions:
-            cmdList.append(currCmd)
-            currCmd = []
-            currCmd.append((word, category.ACTION))
+            cmd_list.finish_and_add_to_list()
+            cmd_list.add_to_curr_cmd(word, category.ACTION)
 
+        # alphabet terms never end commands. Can be indefinitely long
         elif word in alphabet:
-            currCmd.append((alphabet[word], category.ALPHABET))
+            cmd_list.add_to_curr_cmd(alphabet[word], category.ALPHABET)
 
         elif word in applications:
-            if (lastTerm is not None):
-                # only append applications when the last word was an action
-                # doesn't make sense to make a command like 'shift super firefox'
-                if lastTerm[DESCRIPTION_INDEX] == 'action':
-                    currCmd.append((word, category.APPLICATION))
+            # only append applications when the previous word was an action
+            # doesn't make sense to make a command like 'shift super firefox'
+            if previousDescription == category.ACTION:
+                decodedApplication = CONF.get_config()[word]
+                cmd_list.add_to_curr_cmd(decodedApplication, category.APPLICATION)
 
         # handle natural speech commands
         else:
-            if index != 0:
-                if (lastTerm is None):
-                    cmdList.append(currCmd)
-                    currCmd = []
-                elif (lastTerm[DESCRIPTION_INDEX] != category.NATURAL):
-                    cmdList.append(currCmd)
-                    currCmd = []
-            
-            currCmd.append((word, category.NATURAL))
-            
+            if (previousDescription != category.NATURAL) and (previousDescription != category.ACTION):
+                cmd_list.finish_and_add_to_list()
+            cmd_list.add_to_curr_cmd(word, category.NATURAL)
 
-    # add last command to list. Not handled otherwise
-    if currCmd != []:
-        cmdList.append(currCmd)
+    cmd_list.finish_and_add_to_list()
 
-    return cmdList
+    return cmd_list
 
 
 
@@ -273,13 +297,13 @@ if __name__ == '__main__':
     # print("\n")
     # print(_parse_command("shift down super a editor escape a a shift b b", alphabet={"a": "a", "b": "b", "c": "c"}))
     # print("\n")
-    # print(_parse_command("volume down super c volume up", alphabet={"a": "a", "b": "b", "c": "c"}))
 
 
-    print(get_focused_window_name())
+    # print(get_focused_window_name())
     CONF = setup_conf.application_config("config.yaml")
 
-    # print(_parse_command("super cap", alphabet=CONF.get_alphabet()))
-    # _run_command("super cap", CONF=CONF)
+    # print(_parse_command("focus editor focus editor focus mozilla firefox focus super cap focus editor mozilla firefox", CONF).get_cmd_list())
+    # print(_parse_command("super cap super bat", CONF).get_cmd_list())
+
     _run_command("new bookmark super cap", CONF=CONF)
 
