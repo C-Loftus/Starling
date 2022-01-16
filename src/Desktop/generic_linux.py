@@ -1,7 +1,5 @@
  # echo Hello | osd_cat -p bottom -A center -o -80
 
-# sudo apt install libxosd2 xosd-bin
-
 # osd_cat -A center --pos bottom --color white -u transparent -f "-*-*-medium-*-*-*-*-*-*-*-*-120-*-*" token
 
 # font is in the X font format
