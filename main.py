@@ -1,4 +1,3 @@
-from sounddevice import sleep
 from Desktop.generic_linux import screen_print, detect_time_for_break
 from Desktop.gnome import *
 from Desktop.mode_functions import handle_transcription, mode
