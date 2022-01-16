@@ -8,7 +8,10 @@ import subprocess
 from multiprocessing import Process
 from os import environ
 from threading import Thread
-import X_window
+try:
+    import xdotool_wrappers
+except:
+    from . import xdotool_wrappers
 
 # python way to import up a directory
 import os, sys
@@ -48,7 +51,7 @@ def handle_transcription(transcription, current_mode, CONF):
         if current_mode == mode.COMMAND:
             _run_command(transcription, CONF)
         elif current_mode == mode.DICTATION:
-            _run_dictation(transcription, CONF)
+            _run_dictation(transcription)
         elif current_mode == mode.SHELL:
             _run_shell(transcription, CONF)
         elif current_mode == mode.SLEEP:
@@ -153,7 +156,7 @@ def _join_cmd_words(cmd_words):
 
 def _run_command(transcription, CONF):
 
-    context = X_window.get_focused_window_name()
+    context = xdotool_wrappers.get_focused_window_name()
     context_cmds = CONF.get_context_cmds(context)
 
     result: cmdList = _parse_command(transcription, CONF)
@@ -172,8 +175,7 @@ def _run_command(transcription, CONF):
                 decode_cmd = context_cmds[final_cmd]
                 pyautogui.hotkey(*decode_cmd.split())
             except:
-                print(f'Could not find natural command \'{command}\'\
-                in context {context} with commands {context_cmds}')
+                print(f'Could not find natural command {command} in context {context} with commands {context_cmds}')
         
         elif typeOfAction == category.ACTION:
             _handle_action(final_cmd)
@@ -199,19 +201,19 @@ def _handle_action(final_command):
 
     
     if application == "this":
-        application = X_window.get_focused_window_name()
+        application = xdotool_wrappers.get_focused_window_name()
     
-    app_id=X_window.get_id_from_name(application)
+    app_id=xdotool_wrappers.get_id_from_name(application)
     print(f'app_id: {app_id} test, application: {application}')
 
     if action == 'focus':
-        X_window.focus_window_by_id(app_id)
+        xdotool_wrappers.focus_window_by_id(app_id)
     elif action == 'close':
-        X_window.close_window_by_id(app_id)
+        xdotool_wrappers.close_window_by_id(app_id)
     elif action == 'minimize':
-        X_window.minimize_window_by_id(app_id)
+        xdotool_wrappers.minimize_window_by_id(app_id)
     elif action == 'maximize':
-        X_window.maximize_window_by_id(app_id)
+        xdotool_wrappers.maximize_window_by_id(app_id)
     elif action == 'start':
         # Start a process on the system
         subprocess.call([application])
@@ -331,5 +333,5 @@ if __name__ == '__main__':
 
     test = [("close", None),('disks', None)]
     _handle_action(test)
-    print(X_window.get_focused_window_name())
+    print(xdotool_wrappers.get_focused_window_name())
 

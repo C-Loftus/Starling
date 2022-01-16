@@ -23,7 +23,7 @@ model:
 - default: nvidia_nemo
 -
   nvidia_nemo:
-    - model_path: "nvidia/stt_en_conformer_ctc_medium.nemo"
+    - model_path: "src/nvidia/stt_en_conformer_ctc_medium.nemo"
     - pretrained_name: "stt_en_conformer_ctc_medium"
     - cuda : -1
     - audio_dir : "Assets/"
@@ -57,3 +57,6 @@ alphabet:
   - plex      : "x" 
   - yank      : "y" 
   - zip       : "z"    
+  - enter     : "enter"
+  - escape    : "escape"
+  - home      : "home"

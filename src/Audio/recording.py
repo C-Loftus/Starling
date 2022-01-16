@@ -16,6 +16,7 @@ class env:
    ambient = 0.0
    start_hyperparameter=3 # the bigger the hyperparameter, the louder the env has to be to start
    stop_hyperparameter=0.25 # the bigger the hyperparameter, the less noise needed to stop
+   file_destination = "src/Assets/recorded.wav"
 
    # pyaudio config
    chunk = 1024
@@ -46,7 +47,7 @@ class env:
 
 
 def record_finish(event, frames):
-   filename = "Assets/recorded.wav"
+   filename = env.file_destination
    record_seconds = 3 # max length
    p = pyaudio.PyAudio()
    # open stream object as input & output
@@ -144,5 +145,5 @@ if __name__== "__main__":
    record_one_phrase()
    import time
    time.sleep(1)
-   playsound("Assets/recorded.wav")
+   playsound(env.file_destination)
 

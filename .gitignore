@@ -1,8 +1,5 @@
-IW_Voice/
-COQUI/
-Assets/*
 __pycache__
 .vscode
-nvidia/*.nemo
-Assets/*.wav
+*.nemo
+*.wav
 *.json

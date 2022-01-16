@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pyyaml = "*"
+pyautogui = "*"
+pygobject = "*"
+playsound = "*"
+psutil = "*"
+nemo-toolkit = {extras = ["all"], version = "*"}
+setuptools = "==59.5.0"
+pyaudio = "*"
+sounddevice = "*"
+numpy-ringbuffer = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"

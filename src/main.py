@@ -5,14 +5,15 @@ from Audio.recording import *
 from nvidia.transcribe_speech import *
 from setup_conf import application_config
 
+CONFIG_PATH = "config.yaml"
+
 # Parses the config and  normalizes audio to the ambient env volume
 def init_conf_and_env():
     screen_print("Initializing...", delay=6)
 
     env.set_vol(initialize=True)
     
-    config_path = "config.yaml"
-    app_conf = application_config(config_path)
+    app_conf = application_config(CONFIG_PATH)
     detect_time_for_break(app_conf.get_time_before_break())
 
     nemo = init_transcribe_conf(TranscriptionConfig)

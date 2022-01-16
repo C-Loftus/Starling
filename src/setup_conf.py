@@ -45,21 +45,25 @@ class application_config:
         return self.alphabet
 
     def get_safety_time(self):
-        return self.safety_time()
+        return self.safety_time
 
     def get_browser_cmds(self):
         return self.browser_cmds
 
     def get_context_cmds(self, context: str):
-        return dict(ChainMap(*self.config[context]))
+        try:
+            ctx_cmds = self.config[context] 
+            return dict(ChainMap(*ctx_cmds))
+        except:
+            return {}
         
 
     #  user shouldn't need to change this. all is handled automatically
     def _load_transcription_config(self):
-        TranscriptionConfig.model_path = "nvidia/stt_en_conformer_ctc_medium.nemo"
+        TranscriptionConfig.model_path = "src/nvidia/stt_en_conformer_ctc_medium.nemo"
         TranscriptionConfig.pretrained_name = "stt_en_conformer_ctc_medium"
         TranscriptionConfig.cuda = -1
-        TranscriptionConfig.audio_dir = "Assets/"
+        TranscriptionConfig.audio_dir = "src/Assets/"
         TranscriptionConfig.audio_type = "wav"
         TranscriptionConfig.batch_size=32
 
