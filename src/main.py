@@ -29,13 +29,12 @@ def main():
     current_mode = mode.COMMAND
 
     while True:
-        print("mainthread")
         record_one_phrase()
         transcriptions = run_inference(TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE)
+        
         print(transcriptions)
         if current_mode is not mode.SLEEP:
             screen_print(transcriptions)
-        # playsound("Assets/recorded.wav")
 
         # all mode switching, gui, and keyboard automation code is handlded here
         current_mode = handle_transcription(transcriptions, current_mode, CONF)
@@ -43,5 +42,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# [NeMo E 2021-12-30 16:57:18 segment:155] Loading Assets/recorded.wav via SoundFile raised RuntimeError: `Error opening 'Assets/recorded.wav': System error.`. NeMo will fallback to loading via pydub.

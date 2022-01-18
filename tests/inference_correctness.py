@@ -1,44 +1,22 @@
-# import sys
-# import os
-  
-# # getting the name of the directory
-# # where the this file is present.
-# current = os.path.dirname(os.path.realpath(__file__))
-  
-# # Getting the parent directory name
-# # where the current directory is present.
-# parent = os.path.dirname(current)
-  
-# # adding the parent directory to 
-# # the sys.path.
-# sys.path.append(parent)
-  
-
-# from Audio.recording import *
-# from nvidia.transcribe_speech import *
-# from setup_conf import application_config
-
-# def init_conf_and_env():
-#     env.set_vol(initialize=True)
-#     config_path = "config.yaml"
-#     application_config(config_path)
-#     t = init_transcribe_conf(TranscriptionConfig)
-#     return t
-    
-
-# def infer_5():
-#     model = init_conf_and_env()
-
-#     TORCH_CAST = model[0]
-#     ASR_MODEL = model[1]
-#     FILEPATHS = model[2]
-#     BATCH_SIZE = model[3]
+    # # print(_run_dictation("command mode"))
+    # # print(_run_dictation("test command"))
+    # # _run_shell("echo test", safety_time=10)Hello world!
+    # print(_parse_command("shift super b b b b c super", alphabet={"a": "a", "b": "b", "c": "c"}))
+    # print("\n")
+    # print(_parse_command("shift super b b focus editor focus alg volume down", alphabet={"a": "a", "b": "b", "c": "c"}))
+    # print("\n")
+    # print(_parse_command("shift down super a editor escape a a shift b b", alphabet={"a": "a", "b": "b", "c": "c"}))
+    # print("\n")
 
 
-#     transcriptions = run_inference(TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE)
-#     print(transcriptions)
+    # print(get_focused_window_name())
+    # CONF = setup_conf.application_config("config.yaml")
 
-# if __name__ == '__main__':
-#     a =os.path.abspath(__file__)
-#     print(a)
-#     infer_5()
+    # print(_parse_command("focus editor focus editor focus mozilla firefox focus super cap focus editor mozilla firefox", CONF).get_cmd_list())
+    # print(_parse_command("super cap super bat", CONF).get_cmd_list())
+
+    # _run_command("new bookmark super cap", CONF=CONF)
+
+    # test = [("close", None),('disks', None)]
+    # _handle_action(test)
+    # print(xdotool_wrappers.get_focused_window_name())

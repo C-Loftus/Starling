@@ -57,6 +57,14 @@ class application_config:
         except:
             return {}
         
+    def get_path(self, application: str):
+        try:
+            path = self.config[application] 
+            all = dict(ChainMap(*path))
+            return all["exe_path"]
+        except:
+            return application
+
 
     #  user shouldn't need to change this. all is handled automatically
     def _load_transcription_config(self):

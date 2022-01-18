@@ -2,7 +2,7 @@ import multiprocessing
 import subprocess
 import pyautogui
 import enum
-from typing import List
+from typing import List, final
 import time
 import subprocess
 from multiprocessing import Process
@@ -22,19 +22,19 @@ import setup_conf
 
 # current mode that the application is running in
 class mode(enum.Enum):
-    COMMAND = 1
-    DICTATION = 2
-    SHELL = 3
-    SLEEP = 4
+    COMMAND = enum.auto()
+    DICTATION = enum.auto()
+    SHELL = enum.auto()
+    SLEEP = enum.auto()
 
 # command category
 class category(enum.Enum):
-    ALPHABET = 1
-    MODIFIER = 2
-    ACTION = 3
-    NATURAL = 4
-    APPLICATION = 5
-    NULL = 6
+    ALPHABET = enum.auto()
+    MODIFIER =enum.auto()
+    ACTION =enum.auto()
+    NATURAL =enum.auto()
+    APPLICATION =enum.auto()
+    NULL = enum.auto()
 
 TERM_INDEX = 0
 DESCRIPTION_INDEX = 1
@@ -142,6 +142,7 @@ def _alert_wrapper(message, q):
 def _join_cmd_words(cmd_words):
     WORD_INDEX = 0
     ACTION_INDEX = 1
+    # only need first item to determine if it is natural
     if cmd_words[0][ACTION_INDEX] == category.NATURAL:
         result = ""
         for word in cmd_words:
@@ -154,7 +155,13 @@ def _join_cmd_words(cmd_words):
         return result
         
 
-def _run_command(transcription, CONF):
+def _run_command(transcription, CONF):\
+
+    # check special cases
+    if transcription.partition(' ')[0] == 'sentence':
+        everything_but_sentence = transcription.partition(' ')[2]
+        _run_dictation(everything_but_sentence)
+        return
 
     context = xdotool_wrappers.get_focused_window_name()
     context_cmds = CONF.get_context_cmds(context)
@@ -178,33 +185,31 @@ def _run_command(transcription, CONF):
                 print(f'Could not find natural command {command} in context {context} with commands {context_cmds}')
         
         elif typeOfAction == category.ACTION:
-            _handle_action(final_cmd)
+            _handle_action(final_cmd, CONF)
 
         elif typeOfAction == category.ALPHABET or typeOfAction == category.MODIFIER:
-            print("pressing")
-            pyautogui.hotkey(*final_cmd)
+            try:
+                pyautogui.hotkey(*final_cmd)
+            except:
+                print(f'final_cmd: {final_cmd} is not made up of valid pyautogui hotkeys')
         else:
             # ignore commands that start with applications.
             # just saying 'Chrome' doesn't mean anything. 
             # Must have an action before it
             pass
+    return
 
-def _handle_action(final_command):
+def _handle_action(final_command: List[str], CONF):
+
     if len(final_command) > 2:
         print("too many arguments")
         return
 
-    action= final_command[0][TERM_INDEX]
-    application= final_command[1][TERM_INDEX]
-
-    print(f'action: {action} application: {application}')
-
-    
-    if application == "this":
-        application = xdotool_wrappers.get_focused_window_name()
+    action= final_command[0]
+    application= final_command[1]
     
     app_id=xdotool_wrappers.get_id_from_name(application)
-    print(f'app_id: {app_id} test, application: {application}')
+    print(f'action: {action}, app_id: {app_id}, application: {application}')
 
     if action == 'focus':
         xdotool_wrappers.focus_window_by_id(app_id)
@@ -216,15 +221,18 @@ def _handle_action(final_command):
         xdotool_wrappers.maximize_window_by_id(app_id)
     elif action == 'start':
         # Start a process on the system
-        subprocess.call([application])
+        try:
+            application_path = CONF.get_path(application)
+            subprocess.Popen(application_path)
+        except:
+            print(f'Could not start {application} with path {application_path}')
+    else:
+        print(f'Unrecognized action: {action}')
 
 class cmdList():
     def __init__(self):
         self.cmds: List[List] = []
         self.curr_cmd: List = []
-
-        # self.only_words: List[List] = []
-        # self.curr_only_words: List = []
 
     def add_to_curr_cmd(self, cmd, type):
         self.curr_cmd.append((cmd, type))
@@ -252,7 +260,7 @@ def _parse_command(transcription, CONF):
 
     '''
     Command Format:
-    ((modifiers)* (alphabet)*) || ((focus/close/open) (editor/terminal/browser))
+    ((modifiers)* (alphabet)*) || ((focus/close/start) (editor/terminal/browser))
     '''
 
     modifiers = {'ctrl', 'alt', 'shift', 'super', 'win'}
@@ -267,14 +275,15 @@ def _parse_command(transcription, CONF):
 
         previousElement = cmd_list.get_previous_element()
         previousDescription = previousElement[DESCRIPTION_INDEX]
+
+        word = format_keys(word)
         
         # modifiers only begin cmds or follow other modifiers
         if word in modifiers:
             if (previousDescription != category.MODIFIER) and index != 0:
                 cmd_list.finish_and_add_to_list()
             #pyauto gui only uses win not super
-            key = pyautogui_format(word)
-            cmd_list.add_to_curr_cmd(key, category.MODIFIER)
+            cmd_list.add_to_curr_cmd(word, category.MODIFIER)
 
         # There can only be one cmd term for every cmd
         # i.e. it doesn't make sense to have 'close focus browser'
@@ -291,8 +300,9 @@ def _parse_command(transcription, CONF):
             # only append applications when the previous word was an action
             # doesn't make sense to make a command like 'shift super firefox'
             if previousDescription == category.ACTION:
-                decodedApplication = CONF.get_config()[word]
-                cmd_list.add_to_curr_cmd(decodedApplication, category.APPLICATION)
+                decodedApplication = decode_application(word, CONF)
+                if decode_application != None:
+                    cmd_list.add_to_curr_cmd(decodedApplication, category.APPLICATION)
 
         # handle natural speech commands
         else:
@@ -305,9 +315,23 @@ def _parse_command(transcription, CONF):
 
     return cmd_list
 
-def pyautogui_format(word):
+def decode_application(application: str, CONF):
+    '''
+    Decodes the application name from the config file
+    '''
+    if application == "this":
+        return xdotool_wrappers.get_focused_window_name()
+    else:
+        try:
+            return CONF.get_config()[application]
+        except:
+            return None
+
+def format_keys(word):
     if word == 'super':
         return 'win'
+    if word == "control":
+        return 'ctrl'
     return word
 
 if __name__ == '__main__':
@@ -331,7 +355,7 @@ if __name__ == '__main__':
 
     # _run_command("new bookmark super cap", CONF=CONF)
 
-    test = [("close", None),('disks', None)]
-    _handle_action(test)
-    print(xdotool_wrappers.get_focused_window_name())
+    # test = [("start", None),('firefox', None)]
+    test = ["start", "Mozilla Firefox"]
+    _handle_action(test, CONF)
 
