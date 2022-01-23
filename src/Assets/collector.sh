@@ -65,14 +65,18 @@ arr=(
 "control_page_up"
 )
 
-echo 'gender: m/f'
-read gender
+# echo 'gender: m/f'
+# read gender
 
-echo 'age'
-read age
+# echo 'age'
+# read age
 
-echo 'dialect'
-read dialect
+# echo 'dialect'
+# read dialect
+gender=$1
+age=$2
+dialect=$3
+
 
 d=$(date +%Y-%m-%d-%I)
 
@@ -82,9 +86,8 @@ mkdir -p $dir
 
 for i in ${arr[@]};do
     echo -e "\n\n Next Word- >: ${green}${bold}  $i ${reset} \n\n"
-    sleep 2
+    sleep 1
     echo "STARTING RECORDING"
     arecord -vv -fdat $dir/"${i}".wav  >> /dev/null 2>&1
     echo "-e RECORDING DONE"
-
 done

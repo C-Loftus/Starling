@@ -10,13 +10,13 @@ def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*"):
 
     thread = Thread(target=os.system, \
         args=("echo {} | osd_cat --delay={} \
-             -A center --pos bottom --color white -u transparent -f {}"
+             -A center --pos bottom --color white -u blue -O 2 -f {}"
              .format(message, delay, font),)
         )
     thread.start()
 
 # detect how long user has been working on the keyboard
-def detect_time_for_break(min_until_break):
+def timer_create(min_until_break):
     from datetime import time, datetime
     import time as t
     seconds_until_break = min_until_break * 60
@@ -45,7 +45,7 @@ def detect_time_for_break(min_until_break):
                 time = 0
                 print("break detected")
             elif (time) > (seconds_until_break):
-                screen_print("Time to take a break!")
+                screen_print('Time to take a break! You have idled for {} minutes'.format(int(time)))
 
     thread = Thread(target=work_time)
     thread.start()
@@ -58,4 +58,4 @@ if __name__ == '__main__':
     print (strftime("%Y-%m-%d %H:%M:%S", gmtime()))
     screen_print("Starting", delay=10)
     print("starting")
-    detect_time_for_break(30)
+    timer_create(30)
