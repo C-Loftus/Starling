@@ -45,7 +45,7 @@ def timer_create(min_until_break):
                 time = 0
                 print("break detected")
             elif (time) > (seconds_until_break):
-                screen_print('Time to take a break! You have idled for {} minutes'.format(int(time)))
+                screen_print('Time to take a break!')
 
     thread = Thread(target=work_time)
     thread.start()

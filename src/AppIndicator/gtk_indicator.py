@@ -19,7 +19,10 @@ from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Notify as notify
 from gi.repository import GLib;    
 from socket import socket   
-from socket_fns import ClientSocket
+try:
+    from socket_fns import ClientSocket
+except:
+    from src.AppIndicator.socket_fns import ClientSocket    
 
 PORT = ClientSocket.PORT
 
@@ -44,9 +47,9 @@ class ProgramIndicator:
 
     # /https://stackoverflow.com/questions/8826523/gtk-main-and-unix-sockets
         self.s = socket()    
-        self.s.bind(('localhost', 12345))    
+        self.s.bind(('localhost', PORT))    
         self.s.listen()    
-        GLib.io_add_watch(GLib.IOChannel(s.fileno()), 0, GLib.IOCondition.IN, self.listener, self.s)    
+        GLib.io_add_watch(GLib.IOChannel(self.s.fileno()), 0, GLib.IOCondition.IN, self.listener, self.s)    
         return gtk.main()
 
     def build_menu(self, break_time):
@@ -91,6 +94,7 @@ class ProgramIndicator:
         return self.script
 
     def quit1(self, source):
+        
         notify.uninit()
         gtk.main_quit()
 
@@ -100,8 +104,15 @@ class ProgramIndicator:
         return True    
 
     def handler(self, io, cond, sock):    
-        print(sock.recv(1000))
-        self.set_red(self)    
+        recv = (sock.recv(1000)).decode()
+        print(recv)
+        if recv == 'command mode':
+            self.set_red(self)    
+        elif 'quit application'in recv:
+            
+            pid = recv.split(' ')[0]
+            os.kill(int(pid), signal.SIGTERM)
+            self.quit1(self)
         return True    
 
 if __name__ == "__main__":
