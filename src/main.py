@@ -1,9 +1,11 @@
+from AppIndicator.gtk_indicator import APPINDICATOR_ID
 from Desktop.generic_linux import screen_print, detect_time_for_break
 from Desktop.gnome import *
 from Desktop.mode_functions import handle_transcription, mode
 from Audio.recording import *
 from nvidia.transcribe_speech import *
 from setup_conf import application_config
+from AppIndicator.socket_fns import *
 
 CONFIG_PATH = "config.yaml"
 
@@ -22,11 +24,13 @@ def init_conf_and_env():
     return nemo[0], nemo[1], nemo[2], nemo[3], app_conf
     
 
+
 def main():
 
     TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE, CONF = init_conf_and_env()
+    APPINDICATOR_SOCKET = init_socket()
 
-    current_mode = mode.COMMAND
+    previous_mode, current_mode = mode.COMMAND, mode.COMMAND
 
     while True:
         record_one_phrase()
@@ -39,6 +43,11 @@ def main():
         # all mode switching, gui, and keyboard automation code is handlded here
         current_mode = handle_transcription(transcriptions, current_mode, CONF)
 
+        if current_mode != previous_mode:
+            send_socket_state(current_mode, APPINDICATOR_SOCKET)
+            previous_mode = current_mode
+        
+        previous_mode = current_mode
 
 if __name__ == '__main__':
     main()

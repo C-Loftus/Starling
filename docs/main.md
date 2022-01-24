@@ -18,3 +18,7 @@ This functionality allows the power and flexibility of the shell in conjunction 
  sleep mode  does not perform any action until it hears a command to switch the mode.
 
 # Configuring
+
+
+# Acknowledgements
+### All icons in CC or MIT license

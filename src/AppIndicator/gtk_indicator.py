@@ -4,6 +4,7 @@
 # http://candidtim.github.io/appindicator/2014/09/13/ubuntu-appindicator-step-by-step.html
 # https://gist.github.com/candidtim/7290a1ad6e465d680b68
 
+from multiprocessing.connection import Client
 import os
 import signal
 import subprocess
@@ -18,29 +19,34 @@ from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Notify as notify
 from gi.repository import GLib;    
 from socket import socket   
+from socket_fns import ClientSocket
 
-
+PORT = ClientSocket.PORT
 
 APPINDICATOR_ID = 'scriptindicator'
-GREEN_PATH = 'src/Assets/green.svg'
-RED_PATH = 'src/Assets/red.svg'
 
+# https://commons.wikimedia.org/wiki/File:Eo_circle_green_blank.svg
+GREEN_PATH = 'src/Assets/green.svg'
+# https://commons.wikimedia.org/wiki/File:Red_x.svg
+RED_PATH = 'src/Assets/red.svg'
+# <a href="https://commons.wikimedia.org/wiki/File:Triangle_blue.svg">Константине12591</a>, Public domain, via Wikimedia Commons
+BLUE_PATH = 'src/Assets/blue.svg'
+# https://commons.wikimedia.org/wiki/File:Creative-Tail-Halloween-half-moon.svg
+SLEEP_PATH = 'src/Assets/moon1.svg'
 
 class ProgramIndicator:
 
-    # https://commons.wikimedia.org/wiki/File:Red_x.svg
-    # https://commons.wikimedia.org/wiki/File:Eo_circle_green_blank.svg
     def __init__(self, break_time):
-        self.indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath(GREEN_PATH), appindicator.IndicatorCategory.SYSTEM_SERVICES)
+        self.indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath(SLEEP_PATH), appindicator.IndicatorCategory.SYSTEM_SERVICES)
         self.indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
         self.indicator.set_menu(self.build_menu(break_time))
         notify.init(APPINDICATOR_ID)
 
     # /https://stackoverflow.com/questions/8826523/gtk-main-and-unix-sockets
-        s = socket()    
-        s.bind(('localhost', 50155))    
-        s.listen()    
-        GLib.io_add_watch(GLib.IOChannel(s.fileno()), 0, GLib.IOCondition.IN, self.listener, s)    
+        self.s = socket()    
+        self.s.bind(('localhost', 12345))    
+        self.s.listen()    
+        GLib.io_add_watch(GLib.IOChannel(s.fileno()), 0, GLib.IOCondition.IN, self.listener, self.s)    
         return gtk.main()
 
     def build_menu(self, break_time):
@@ -76,6 +82,9 @@ class ProgramIndicator:
 
     def set_green(self, source):
         self.indicator.set_icon(os.path.abspath(GREEN_PATH))
+
+    def set_sleep(self, source):
+        self.indicator.set_icon(os.path.abspath(SLEEP_PATH))
 
     def script(self, source):
         subprocess.call("echo test", shell=True)
