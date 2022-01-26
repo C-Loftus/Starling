@@ -17,7 +17,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk as gtk
 from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Notify as notify
-from gi.repository import GLib;    
+from gi.repository import GLib
 from socket import socket   
 try:
     from socket_fns import ClientSocket
@@ -28,12 +28,19 @@ PORT = ClientSocket.PORT
 
 APPINDICATOR_ID = 'scriptindicator'
 
+# Indicator for shell mode
 # https://commons.wikimedia.org/wiki/File:Eo_circle_green_blank.svg
 GREEN_PATH = 'src/Assets/green.svg'
+
+# Indicator for command mode
 # https://commons.wikimedia.org/wiki/File:Red_star.svg
-RED_PATH = 'src/Assets/red.svg'
+ORANGE_PATH = 'src/Assets/orange.svg'
+
+# Indicator for command mode
 # <a href="https://commons.wikimedia.org/wiki/File:Triangle_blue.svg">Константине12591</a>, Public domain, via Wikimedia Commons
 BLUE_PATH = 'src/Assets/blue.svg'
+
+# Indicator for sleep mode
 # https://commons.wikimedia.org/wiki/File:Creative-Tail-Halloween-half-moon.svg
 SLEEP_PATH = 'src/Assets/moon1.svg'
 
@@ -41,7 +48,7 @@ class ProgramIndicator:
     TIMER_ID = None
 
     def __init__(self, CONF):
-        self.indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath(RED_PATH), appindicator.IndicatorCategory.SYSTEM_SERVICES)
+        self.indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath(ORANGE_PATH), appindicator.IndicatorCategory.SYSTEM_SERVICES)
         self.indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
         self.indicator.set_menu(self.build_menu(CONF))
         notify.init(APPINDICATOR_ID)
@@ -73,8 +80,8 @@ class ProgramIndicator:
         menu.show_all()
         return menu
 
-    def set_red(self, source):
-        self.indicator.set_icon(os.path.abspath(RED_PATH))
+    def set_orange(self, source):
+        self.indicator.set_icon(os.path.abspath(ORANGE_PATH))
 
     def set_green(self, source):
         self.indicator.set_icon(os.path.abspath(GREEN_PATH))
@@ -103,7 +110,7 @@ class ProgramIndicator:
         recv = (sock.recv(1000)).decode()
         print("Received: ", recv)
         if recv == 'command mode':
-            self.set_red(self)    
+            self.set_orange(self)    
         elif recv == 'dictation mode':
             self.set_blue(self)
         elif recv == 'shell mode':
