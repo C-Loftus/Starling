@@ -16,7 +16,7 @@ def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*"):
     thread.start()
 
 # detect how long user has been working on the keyboard
-def timer_create(min_until_break):
+def timer_create(min_until_break, delay):
     from datetime import time, datetime
     import time as t
     seconds_until_break = min_until_break * 60
@@ -45,7 +45,7 @@ def timer_create(min_until_break):
                 time = 0
                 print("break detected")
             elif (time) > (seconds_until_break):
-                screen_print('Time to take a break!')
+                screen_print('Time to take a break!', delay=delay)
 
     thread = Thread(target=work_time)
     thread.start()
@@ -56,6 +56,6 @@ def timer_create(min_until_break):
 if __name__ == '__main__':
     from time import gmtime, strftime
     print (strftime("%Y-%m-%d %H:%M:%S", gmtime()))
-    screen_print("Starting", delay=10)
+    screen_print("Starting", delay=5)
     print("starting")
-    timer_create(30)
+    timer_create(30, delay=5)

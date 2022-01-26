@@ -22,7 +22,7 @@ from socket import socket
 try:
     from socket_fns import ClientSocket
 except:
-    from src.AppIndicator.socket_fns import ClientSocket    
+    from AppIndicator.socket_fns import ClientSocket    
 
 PORT = ClientSocket.PORT
 
@@ -30,7 +30,7 @@ APPINDICATOR_ID = 'scriptindicator'
 
 # https://commons.wikimedia.org/wiki/File:Eo_circle_green_blank.svg
 GREEN_PATH = 'src/Assets/green.svg'
-# https://commons.wikimedia.org/wiki/File:Red_x.svg
+# https://commons.wikimedia.org/wiki/File:Red_star.svg
 RED_PATH = 'src/Assets/red.svg'
 # <a href="https://commons.wikimedia.org/wiki/File:Triangle_blue.svg">Константине12591</a>, Public domain, via Wikimedia Commons
 BLUE_PATH = 'src/Assets/blue.svg'
@@ -38,11 +38,12 @@ BLUE_PATH = 'src/Assets/blue.svg'
 SLEEP_PATH = 'src/Assets/moon1.svg'
 
 class ProgramIndicator:
+    TIMER_ID = None
 
-    def __init__(self, break_time):
-        self.indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath(SLEEP_PATH), appindicator.IndicatorCategory.SYSTEM_SERVICES)
+    def __init__(self, CONF):
+        self.indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath(RED_PATH), appindicator.IndicatorCategory.SYSTEM_SERVICES)
         self.indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
-        self.indicator.set_menu(self.build_menu(break_time))
+        self.indicator.set_menu(self.build_menu(CONF))
         notify.init(APPINDICATOR_ID)
 
     # /https://stackoverflow.com/questions/8826523/gtk-main-and-unix-sockets
@@ -52,13 +53,9 @@ class ProgramIndicator:
         GLib.io_add_watch(GLib.IOChannel(self.s.fileno()), 0, GLib.IOCondition.IN, self.listener, self.s)    
         return gtk.main()
 
-    def build_menu(self, break_time):
+    def build_menu(self, CONF):
         menu = gtk.Menu()
 
-        item_script = gtk.MenuItem('script')
-        item_script.connect('activate', self.script)
-
-        menu.append(item_script)
 
         enable = gtk.MenuItem('enable auto break timer')
         enable.connect('activate', self.script)
@@ -73,10 +70,6 @@ class ProgramIndicator:
         item_quit1.connect('activate', self.quit1)
         menu.append(item_quit1)
 
-        red = gtk.MenuItem('red')
-        red.connect('activate', self.set_red)
-        menu.append(red)
-
         menu.show_all()
         return menu
 
@@ -85,6 +78,9 @@ class ProgramIndicator:
 
     def set_green(self, source):
         self.indicator.set_icon(os.path.abspath(GREEN_PATH))
+
+    def set_blue(self, source):
+        self.indicator.set_icon(os.path.abspath(BLUE_PATH))
 
     def set_sleep(self, source):
         self.indicator.set_icon(os.path.abspath(SLEEP_PATH))
@@ -105,14 +101,29 @@ class ProgramIndicator:
 
     def handler(self, io, cond, sock):    
         recv = (sock.recv(1000)).decode()
-        print(recv)
+        print("Received: ", recv)
         if recv == 'command mode':
             self.set_red(self)    
+        elif recv == 'dictation mode':
+            self.set_blue(self)
+        elif recv == 'shell mode':
+            self.set_green(self)
+        
+        elif recv == 'sleep mode':
+            self.set_sleep(self)
+        
         elif 'quit application'in recv:
-            
             pid = recv.split(' ')[0]
             os.kill(int(pid), signal.SIGTERM)
             self.quit1(self)
+
+        elif 'start timer':
+            pass
+        elif 'stop timer':
+            pass
+        else:
+            pass
+
         return True    
 
 if __name__ == "__main__":
