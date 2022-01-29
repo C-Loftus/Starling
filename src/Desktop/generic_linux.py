@@ -5,6 +5,7 @@
 # font is in the X font format
 import os
 from threading import Thread
+from multiprocessing import Process
 
 def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*"):
 
@@ -17,9 +18,10 @@ def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*"):
 
 # detect how long user has been working on the keyboard
 def timer_create(min_until_break, delay):
-    from datetime import time, datetime
     import time as t
     seconds_until_break = min_until_break * 60
+
+    screen_print("Timer starting with {} min intervals".format(min_until_break), delay)
 
     def idle_time():
         #xprintidle
@@ -47,10 +49,10 @@ def timer_create(min_until_break, delay):
             elif (time) > (seconds_until_break):
                 screen_print('Time to take a break!', delay=delay)
 
-    thread = Thread(target=work_time)
-    thread.start()
+    p = Process(target=work_time)
+    p.start()
 
-    return thread
+    return p
 
 
 if __name__ == '__main__':

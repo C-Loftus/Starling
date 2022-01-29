@@ -19,10 +19,18 @@ from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Notify as notify
 from gi.repository import GLib
 from socket import socket   
-try:
-    from socket_fns import ClientSocket
-except:
-    from AppIndicator.socket_fns import ClientSocket    
+# try:
+#     from socket_fns import ClientSocket
+# except:
+#     from AppIndicator.socket_fns import ClientSocket    
+
+import os, sys
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+
+from AppIndicator.socket_fns import ClientSocket    
+from Desktop.generic_linux import *
 
 PORT = ClientSocket.PORT
 
@@ -45,13 +53,15 @@ BLUE_PATH = 'src/Assets/blue.svg'
 SLEEP_PATH = 'src/Assets/moon1.svg'
 
 class ProgramIndicator:
-    TIMER_ID = None
+    timer = None
+    CONF = None
 
     def __init__(self, CONF):
         self.indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath(ORANGE_PATH), appindicator.IndicatorCategory.SYSTEM_SERVICES)
         self.indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
         self.indicator.set_menu(self.build_menu(CONF))
         notify.init(APPINDICATOR_ID)
+        self.CONF=CONF
 
     # /https://stackoverflow.com/questions/8826523/gtk-main-and-unix-sockets
         self.s = socket()    
@@ -69,7 +79,7 @@ class ProgramIndicator:
         menu.append(enable)
 
         disable = gtk.MenuItem('disable auto break timer')
-        disable.connect('activate', self.script)
+        disable.connect('activate', self.kill_script)
         menu.append(disable)
 
 
@@ -93,11 +103,21 @@ class ProgramIndicator:
         self.indicator.set_icon(os.path.abspath(SLEEP_PATH))
 
     def script(self, source):
-        subprocess.call("echo test", shell=True)
+        time_until_break = self.CONF.get_time_before_break()
+        # delay of 5 is a sensible default for printing msg to screen 
+        timer = timer_create(time_until_break, delay=5)
+        self.timer=timer
+
         return self.script
 
+    def kill_script(self, source):
+        self.timer.kill()
+        screen_print("Timer disabled")
+        return self.kill_script
+
+
     def quit1(self, source):
-        
+        self.timer.kill()
         notify.uninit()
         gtk.main_quit()
 
