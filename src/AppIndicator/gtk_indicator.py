@@ -6,6 +6,7 @@
 
 from multiprocessing.connection import Client
 import os
+import re
 import signal
 import subprocess
 
@@ -111,15 +112,18 @@ class ProgramIndicator:
         return self.script
 
     def kill_script(self, source):
-        self.timer.kill()
+        if self.timer != None:
+            self.timer.kill()
         screen_print("Timer disabled")
         return self.kill_script
 
 
     def quit1(self, source):
-        self.timer.kill()
-        notify.uninit()
-        gtk.main_quit()
+        try:
+            self.kill_script(self)
+        finally:
+            notify.uninit()
+            gtk.main_quit()
 
     def listener(self, io, cond, sock):    
         conn = sock.accept()[0]    
@@ -129,14 +133,15 @@ class ProgramIndicator:
     def handler(self, io, cond, sock):    
         recv = (sock.recv(1000)).decode()
         print("Received: ", recv)
-        if recv == 'command mode':
+
+        if 'command mode' in recv:
             self.set_orange(self)    
-        elif recv == 'dictation mode':
+        elif 'dictation mode' in recv:
             self.set_blue(self)
-        elif recv == 'shell mode':
+        elif 'shell mode' in recv:
             self.set_green(self)
         
-        elif recv == 'sleep mode':
+        elif 'sleep mode' in recv:
             self.set_sleep(self)
         
         elif 'quit application'in recv:
@@ -144,12 +149,12 @@ class ProgramIndicator:
             os.kill(int(pid), signal.SIGTERM)
             self.quit1(self)
 
-        elif 'start timer':
-            pass
-        elif 'stop timer':
-            pass
+        elif 'start timer' in recv:
+            self.script()
+        elif 'stop timer' in recv:
+            self.kill_script(self)
         else:
-            pass
+            print("Nothing to change")
 
         return True    
 
