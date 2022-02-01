@@ -9,6 +9,7 @@ import os
 import re
 import signal
 import subprocess
+from time import sleep
 
 import gi
 gi.require_version('AppIndicator3', '0.1')
@@ -114,7 +115,7 @@ class ProgramIndicator:
     def kill_script(self, source):
         if self.timer != None:
             self.timer.kill()
-        screen_print("Timer disabled")
+            screen_print("Timer disabled")
         return self.kill_script
 
 
@@ -124,6 +125,8 @@ class ProgramIndicator:
         finally:
             notify.uninit()
             gtk.main_quit()
+        sleep(2)
+        screen_print("Quitting indicator app")
 
     def listener(self, io, cond, sock):    
         conn = sock.accept()[0]    
@@ -132,7 +135,8 @@ class ProgramIndicator:
 
     def handler(self, io, cond, sock):    
         recv = (sock.recv(1000)).decode()
-        print("Received: ", recv)
+        if recv != "":
+            print("Received: ", recv)
 
         if 'command mode' in recv:
             self.set_orange(self)    
@@ -154,7 +158,7 @@ class ProgramIndicator:
         elif 'stop timer' in recv:
             self.kill_script(self)
         else:
-            print("Nothing to change")
+            pass
 
         return True    
 

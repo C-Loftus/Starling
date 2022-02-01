@@ -160,7 +160,8 @@ def run_inference(autocast, asr_model, filepaths, batch_size):
     with autocast():
         with torch.no_grad():
             transcriptions = asr_model.transcribe(filepaths, batch_size=batch_size)
-    return transcriptions
+    # Only use the first index since we are only parsing one wav file
+    return transcriptions[0]
 
 
 if __name__ == '__main__':

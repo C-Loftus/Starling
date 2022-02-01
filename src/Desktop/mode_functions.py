@@ -40,8 +40,6 @@ TERM_INDEX = 0
 DESCRIPTION_INDEX = 1
 
 def handle_transcription(transcription, current_mode, CONF):
-    # Only use the first index since we are only parsing one wav file
-    transcription = transcription[0]
 
     changed, switched_mode = _check_switch_request(transcription, current_mode)
 

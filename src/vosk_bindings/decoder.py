@@ -5,7 +5,7 @@ import sys
 import os
 import wave
 MODEL_PATH='src/vosk_bindings/model'
-AUDIO_PATH='src/Assets/test.wav'
+AUDIO_PATH='src/Assets/recorded.wav'
 
 class VoskModel:
     def __init__(self):

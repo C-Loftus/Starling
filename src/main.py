@@ -55,11 +55,11 @@ def main():
         record_one_phrase()
 
         if modelWrapper.default == "nemo":
-            transcriptions = run_inference(CONF.nvidia_items)
+            transcriptions = run_inference(modelWrapper.nvidia_items)
         elif modelWrapper.default == "vosk":
             transcriptions = modelWrapper.vosk_model.run_inference(current_mode,CONF)
         
-        print(transcriptions, type(transcriptions))
+        print(transcriptions)
         if current_mode is not mode.SLEEP:
             screen_print(transcriptions)
 
@@ -74,3 +74,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
