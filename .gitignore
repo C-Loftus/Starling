@@ -2,3 +2,4 @@ __pycache__
 *.nemo
 *.wav
 source.sh
+model/

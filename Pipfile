@@ -14,6 +14,7 @@ setuptools = "==59.5.0"
 pyaudio = "*"
 sounddevice = "*"
 numpy-ringbuffer = "*"
+vosk = "*"
 
 [dev-packages]
 
