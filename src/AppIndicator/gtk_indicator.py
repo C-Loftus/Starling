@@ -57,6 +57,7 @@ SLEEP_PATH = 'src/Assets/moon1.svg'
 class ProgramIndicator:
     timer = None
     CONF = None
+    link_pid =None
 
     def __init__(self, CONF):
         self.indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath(ORANGE_PATH), appindicator.IndicatorCategory.SYSTEM_SERVICES)
@@ -125,8 +126,11 @@ class ProgramIndicator:
         finally:
             notify.uninit()
             gtk.main_quit()
+        self.s.close()
         sleep(2)
-        screen_print("Quitting indicator app")
+        os.kill(int(self.link_pid), signal.SIGTERM)
+        screen_print("Quitting app")
+
 
     def listener(self, io, cond, sock):    
         conn = sock.accept()[0]    
@@ -135,10 +139,16 @@ class ProgramIndicator:
 
     def handler(self, io, cond, sock):    
         recv = (sock.recv(1000)).decode()
+
         if recv != "":
             print("Received: ", recv)
 
-        if 'command mode' in recv:
+        
+        if ":" in recv:
+            self.link_pid = int(recv.split(':')[1])
+
+
+        elif 'command mode' in recv:
             self.set_orange(self)    
         elif 'dictation mode' in recv:
             self.set_blue(self)
@@ -149,8 +159,6 @@ class ProgramIndicator:
             self.set_sleep(self)
         
         elif 'quit application'in recv:
-            pid = recv.split(' ')[0]
-            os.kill(int(pid), signal.SIGTERM)
             self.quit1(self)
 
         elif 'start timer' in recv:

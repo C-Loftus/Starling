@@ -40,6 +40,7 @@ class VoskModel:
         output = ""
         for i in results:
             output += i.split("\"")[3] + " "
+        # TODO check
         output.strip()
         return output
 

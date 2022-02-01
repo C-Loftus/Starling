@@ -6,18 +6,22 @@ class ClientSocket:
     s: socket = None
 
     def __init__(self) -> None:
+        import os
+        pid = os.getpid()
         s = socket()
         s.connect(('localhost', self.PORT))
+        message=("pid:" + str(pid)).encode()
+        s.send(message)
+
         self.s = s
 
     def check_to_send(self, prev, curr, msg) -> None:
-        import os
-        pid = os.getpid()
+
         msg = ''.join(msg)
         print("Checking to send: ", msg)
 
         if msg == "quit application":
-            self.s.send((str(pid) + " quit application").encode())
+            self.s.send(("quit application").encode())
             self.end_socket()
             return
         if prev != curr:
