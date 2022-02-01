@@ -28,16 +28,18 @@ Kitty:
 - exe_path : "kitty"
 
 
-model:
-- default: nvidia_nemo
--
-  nvidia_nemo:
+models:
+- default: vosk
+- nvidia_nemo:
     - model_path: "src/nvidia/stt_en_conformer_ctc_medium.nemo"
     - pretrained_name: "stt_en_conformer_ctc_medium"
     - cuda : -1
     - audio_dir : "Assets/"
     - audio_type : "wav"
-    - batch_size : 128
+    - batch_size : 12 
+- vosk:
+  - type: "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip"
+
 
 alphabet: 
   - air       : "a" 

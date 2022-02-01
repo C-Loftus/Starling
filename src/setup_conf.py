@@ -3,6 +3,8 @@ from nvidia.transcribe_speech import *
 from collections import ChainMap
 
 class application_config:
+
+
     def __init__(self, config_path):
         self.config_path = config_path
         self._load_config()
@@ -65,6 +67,10 @@ class application_config:
         except:
             return application
 
+    def get_default_model(self):
+        for i in self.config['models']:
+            if list(i.keys()) == ["default"]:
+                return i["default"]
 
     #  user shouldn't need to change this. all is handled automatically
     def _load_transcription_config(self):

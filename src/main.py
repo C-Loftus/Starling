@@ -6,8 +6,15 @@ from Audio.recording import *
 from nvidia.transcribe_speech import *
 from setup_conf import application_config
 from AppIndicator.socket_fns import *
+from vosk_bindings.decoder import VoskModel
 
 CONFIG_PATH = "config.yaml"
+
+class modelWrapper:
+    default: str = None
+    nvidia_model: list = None
+    vosk_model: VoskModel = None
+
 
 # Parses the config and  normalizes audio to the ambient env volume
 def init_conf_and_env():
@@ -23,15 +30,22 @@ def init_conf_and_env():
     # Get the ambient volumeAnd open microphone stream
     env.set_vol(initialize=True)
 
-    # Initialized the model
-    nemo = init_transcribe_conf(TranscriptionConfig)
+    if app_conf.get_default_model() == "nvidia_nemo":
+        # Initialized the model
+        nemo = init_transcribe_conf(TranscriptionConfig)
+        modelWrapper.default = nemo
+        modelWrapper.nvidia_model = (nemo[0], nemo[1], nemo[2], nemo[3])
 
-    screen_print("Initialization complete")
-    return nemo[0], nemo[1], nemo[2], nemo[3], app_conf, p
+    elif app_conf.get_default_model() == "vosk":
+        modelWrapper.default="vosk"
+        modelWrapper.vosk_model = VoskModel()
     
+    screen_print("Initialization complete")
+    return app_conf
+            
 def main():
 
-    TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE, CONF, _ = init_conf_and_env()
+    CONF= init_conf_and_env()
     APPINDICATOR_SOCKET = ClientSocket()
 
     previous_mode, current_mode = mode.COMMAND, mode.COMMAND
@@ -39,9 +53,13 @@ def main():
     while True:
         # Stores directly to .wav file
         record_one_phrase()
-        transcriptions = run_inference(TORCH_CAST, ASR_MODEL, FILEPATHS, BATCH_SIZE)
+
+        if modelWrapper.default == "nemo":
+            transcriptions = run_inference(CONF.nvidia_items)
+        elif modelWrapper.default == "vosk":
+            transcriptions = modelWrapper.vosk_model.run_inference(current_mode,CONF)
         
-        print(transcriptions)
+        print(transcriptions, type(transcriptions))
         if current_mode is not mode.SLEEP:
             screen_print(transcriptions)
 
