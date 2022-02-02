@@ -3,3 +3,4 @@ __pycache__
 *.wav
 source.sh
 model/
+.vscode/*
