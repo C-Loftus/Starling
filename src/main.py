@@ -33,12 +33,12 @@ def init_conf_and_env():
     if app_conf.get_default_model() == "nvidia_nemo":
         # Initialized the model
         nemo = init_transcribe_conf(TranscriptionConfig)
-        modelWrapper.default = nemo
+        modelWrapper.default = "nemo"
         modelWrapper.nvidia_model = (nemo[0], nemo[1], nemo[2], nemo[3])
 
     elif app_conf.get_default_model() == "vosk":
         modelWrapper.default="vosk"
-        modelWrapper.vosk_model = VoskModel()
+        modelWrapper.vosk_model = VoskModel(app_conf)
     
     screen_print("Initialization complete")
     return app_conf
@@ -57,7 +57,7 @@ def main():
         if modelWrapper.default == "nemo":
             transcriptions = run_inference(modelWrapper.nvidia_items)
         elif modelWrapper.default == "vosk":
-            transcriptions = modelWrapper.vosk_model.run_inference(current_mode,CONF)
+            transcriptions = modelWrapper.vosk_model.run_inference(current_mode)
         
         print(transcriptions)
         if current_mode is not mode.SLEEP:

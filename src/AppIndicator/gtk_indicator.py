@@ -114,22 +114,24 @@ class ProgramIndicator:
         return self.script
 
     def kill_script(self, source):
-        if self.timer != None:
-            self.timer.kill()
-            screen_print("Timer disabled")
+        try:
+            if self.timer != None:
+                screen_print("Timer disabled")
+                self.timer.kill()
+        finally:
+            self.timer = None
         return self.kill_script
 
 
     def quit1(self, source):
+        self.kill_script(self)
         try:
-            self.kill_script(self)
+            os.kill(int(self.link_pid), signal.SIGTERM)
         finally:
             notify.uninit()
             gtk.main_quit()
         self.s.close()
-        sleep(2)
-        os.kill(int(self.link_pid), signal.SIGTERM)
-        screen_print("Quitting app")
+        screen_print("Quitting app", position="middle")
 
 
     def listener(self, io, cond, sock):    
@@ -164,11 +166,8 @@ class ProgramIndicator:
         elif 'start timer' in recv:
             self.script()
         elif 'stop timer' in recv:
-            self.kill_script(self)
+            self.kill_script(self, False)
         else:
             pass
 
         return True    
-
-if __name__ == "__main__":
-    indc = ProgramIndicator(10)

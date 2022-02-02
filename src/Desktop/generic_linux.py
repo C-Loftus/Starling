@@ -6,13 +6,14 @@
 import os
 from threading import Thread
 from multiprocessing import Process
+from turtle import pos
 
-def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*"):
+def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*", position="bottom"):
 
     thread = Thread(target=os.system, \
         args=("echo {} | osd_cat --delay={} \
-             -A center --pos bottom --color white -u blue -O 2 -f {}"
-             .format(message, delay, font),)
+             -A center --pos {} --color white -u blue -O 2 -f {}"
+             .format(message, delay, position, font),)
         )
     thread.start()
 
@@ -58,6 +59,6 @@ def timer_create(min_until_break, delay):
 if __name__ == '__main__':
     from time import gmtime, strftime
     print (strftime("%Y-%m-%d %H:%M:%S", gmtime()))
-    screen_print("Starting", delay=5)
+    screen_print("Starting", delay=5, position="middle")
     print("starting")
     timer_create(30, delay=5)
