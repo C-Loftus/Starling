@@ -199,7 +199,7 @@ def _run_command(transcription, CONF):\
 
 def _handle_action(final_command: List[str], CONF):
 
-    if len(final_command) > 2:
+    if len(final_command) < 2:
         print("too many arguments")
         return
 

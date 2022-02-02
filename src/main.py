@@ -6,7 +6,7 @@ from Audio.recording import *
 from nvidia.transcribe_speech import *
 from setup_conf import application_config
 from AppIndicator.socket_fns import *
-from vosk_bindings.decoder import VoskModel
+from vosk_bindings.mic_input import VoskModel
 
 CONFIG_PATH = "config.yaml"
 
@@ -18,11 +18,12 @@ class modelWrapper:
 
 # Parses the config and  normalizes audio to the ambient env volume
 def init_conf_and_env():
-    screen_print("Initializing...", delay=6)
+    screen_print("Initializing...", delay=4)
     
     # Get the config From the user supplied file
     app_conf = application_config(CONFIG_PATH)
     
+    global p
     # Initialize the app indicator on the dock
     p = Process(target=ProgramIndicator, args=(app_conf,))
     p.start()
@@ -51,13 +52,13 @@ def main():
     previous_mode, current_mode = mode.COMMAND, mode.COMMAND
 
     while True:
-        # Stores directly to .wav file
-        record_one_phrase()
 
         if modelWrapper.default == "nemo":
+            # Stores directly to .wav file
+            record_one_phrase()
             transcriptions = run_inference(modelWrapper.nvidia_items)
         elif modelWrapper.default == "vosk":
-            transcriptions = modelWrapper.vosk_model.run_inference(current_mode)
+            transcriptions = modelWrapper.vosk_model.record_and_infer(current_mode)
         
         print(transcriptions)
         if current_mode is not mode.SLEEP:
@@ -73,5 +74,9 @@ def main():
         previous_mode = current_mode
 
 if __name__ == '__main__':
-    main()
-    
+
+    try: 
+        main()
+    except KeyboardInterrupt:
+        print('\nDone')
+        sys.exit(0)
