@@ -10,12 +10,6 @@ from vosk_bindings.mic_input import VoskModel
 
 CONFIG_PATH = "config.yaml"
 
-class modelWrapper:
-    default: str = None
-    nvidia_model: list = None
-    vosk_model: VoskModel = None
-
-
 # Parses the config and  normalizes audio to the ambient env volume
 def init_conf_and_env():
     screen_print("Initializing...", delay=4)
@@ -33,30 +27,36 @@ def init_conf_and_env():
     if app_conf.get_default_model() == "nvidia_nemo":
         # Initialized the model
         nemo = init_transcribe_conf(TranscriptionConfig)
-        modelWrapper.default = "nemo"
-        modelWrapper.nvidia_model = (nemo[0], nemo[1], nemo[2], nemo[3])
+        default = "nemo"
+        model = (nemo[0], nemo[1], nemo[2], nemo[3])
 
     elif app_conf.get_default_model() == "vosk":
-        modelWrapper.default="vosk"
-        modelWrapper.vosk_model = VoskModel(app_conf)
+        default="vosk"
+        model = VoskModel(app_conf)
     
     screen_print("Initialization complete")
-    return app_conf
+    return model, default, app_conf
             
 def main():
-    CONF= init_conf_and_env()
+    model, default, CONF= init_conf_and_env()
     APPINDICATOR_SOCKET = ClientSocket()
     previous_mode, current_mode = mode.COMMAND, mode.COMMAND
 
     try:
         while True:
 
-            if modelWrapper.default == "nemo":
+            '''
+            There are two different interfaces for drawing inferences from the models
+             since the nvidia nemo toolkit conformer model uses a batch API
+              whereas the vosk model uses a stream API
+            '''
+            
+            if default == "nemo":
                 # Stores directly to .wav file
                 record_one_phrase()
-                transcriptions = run_inference(modelWrapper.nvidia_items)
-            elif modelWrapper.default == "vosk":
-                transcriptions = modelWrapper.vosk_model.record_and_infer(current_mode)
+                transcriptions = run_inference(*model)
+            elif default == "vosk":
+                transcriptions = model.record_and_infer(current_mode)
             
             print(transcriptions)
             if current_mode is not mode.SLEEP:
@@ -71,6 +71,7 @@ def main():
 
             previous_mode = current_mode
 
+    #  polite cleanup message to socket and ends program
     except KeyboardInterrupt:
         APPINDICATOR_SOCKET.force_quit()
         sys.exit(0)

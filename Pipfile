@@ -9,15 +9,14 @@ pyautogui = "*"
 pygobject = "*"
 playsound = "*"
 psutil = "*"
-nemo-toolkit = {extras = ["all"], version = "*"}
 setuptools = "==59.5.0"
 pyaudio = "*"
 sounddevice = "*"
 numpy-ringbuffer = "*"
 vosk = "*"
-srt = "*"
 
 [dev-packages]
+nemo-toolkit = {extras = ["all"], version = "*"}
 
 [requires]
 python_version = "3.8"
