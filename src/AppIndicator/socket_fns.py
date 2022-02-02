@@ -16,7 +16,6 @@ class ClientSocket:
         self.s = s
 
     def check_to_send(self, prev, curr, msg) -> None:
-
         msg = ''.join(msg)
         print("Checking to send: ", msg)
 
@@ -33,5 +32,7 @@ class ClientSocket:
             self.s.close()
             self.s = None
         
-        
+    def force_quit(self):
+        self.s.send("quit application".encode())
+        self.end_socket()
 

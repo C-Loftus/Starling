@@ -131,7 +131,7 @@ class ProgramIndicator:
             notify.uninit()
             gtk.main_quit()
         self.s.close()
-        screen_print("Quitting app", position="middle")
+        screen_print("Quitting app", position="middle", delay=5)
 
 
     def listener(self, io, cond, sock):    

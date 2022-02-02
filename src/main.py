@@ -1,4 +1,4 @@
-from AppIndicator.gtk_indicator import ProgramIndicator
+from AppIndicator.gtk_indicator import APPINDICATOR_ID, ProgramIndicator
 from Desktop.generic_linux import screen_print
 from Desktop.gnome import *
 from Desktop.mode_functions import handle_transcription, mode
@@ -23,7 +23,6 @@ def init_conf_and_env():
     # Get the config From the user supplied file
     app_conf = application_config(CONFIG_PATH)
     
-    global p
     # Initialize the app indicator on the dock
     p = Process(target=ProgramIndicator, args=(app_conf,))
     p.start()
@@ -45,38 +44,37 @@ def init_conf_and_env():
     return app_conf
             
 def main():
-
     CONF= init_conf_and_env()
     APPINDICATOR_SOCKET = ClientSocket()
-
     previous_mode, current_mode = mode.COMMAND, mode.COMMAND
 
-    while True:
+    try:
+        while True:
 
-        if modelWrapper.default == "nemo":
-            # Stores directly to .wav file
-            record_one_phrase()
-            transcriptions = run_inference(modelWrapper.nvidia_items)
-        elif modelWrapper.default == "vosk":
-            transcriptions = modelWrapper.vosk_model.record_and_infer(current_mode)
-        
-        print(transcriptions)
-        if current_mode is not mode.SLEEP:
-            screen_print(transcriptions)
+            if modelWrapper.default == "nemo":
+                # Stores directly to .wav file
+                record_one_phrase()
+                transcriptions = run_inference(modelWrapper.nvidia_items)
+            elif modelWrapper.default == "vosk":
+                transcriptions = modelWrapper.vosk_model.record_and_infer(current_mode)
+            
+            print(transcriptions)
+            if current_mode is not mode.SLEEP:
+                screen_print(transcriptions)
 
-        # all mode switching, gui, and keyboard automation code is handlded here
-        current_mode = handle_transcription(transcriptions, current_mode, CONF)
+            # all mode switching, gui, and keyboard automation code is handlded here
+            current_mode = handle_transcription(transcriptions, current_mode, CONF)
 
-        # tentatively checks if the user wants to quit the app or sent a command
-        # to the appindicator
-        APPINDICATOR_SOCKET.check_to_send(previous_mode, current_mode, transcriptions)
+            # tentatively checks if the user sent a command is that would affect
+            # the appindicator
+            APPINDICATOR_SOCKET.check_to_send(previous_mode, current_mode, transcriptions)
 
-        previous_mode = current_mode
+            previous_mode = current_mode
+
+    except KeyboardInterrupt:
+        APPINDICATOR_SOCKET.force_quit()
+        sys.exit(0)
+
 
 if __name__ == '__main__':
-
-    try: 
-        main()
-    except KeyboardInterrupt:
-        print('\nDone')
-        sys.exit(0)
+    main()

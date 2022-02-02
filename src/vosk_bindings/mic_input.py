@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-import argparse
 import os
 import queue
 import sounddevice as sd
@@ -67,9 +64,6 @@ class VoskModel:
                         # else:
                         #     print(rec.PartialResult())
 
-        except KeyboardInterrupt:
-            print('\nDone')
-            sys.exit(0)
         except Exception as e:
             sys.exit(type(e).__name__ + ': ' + str(e))
 
