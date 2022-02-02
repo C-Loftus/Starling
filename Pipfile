@@ -15,6 +15,7 @@ pyaudio = "*"
 sounddevice = "*"
 numpy-ringbuffer = "*"
 vosk = "*"
+srt = "*"
 
 [dev-packages]
 
