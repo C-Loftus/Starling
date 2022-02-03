@@ -48,4 +48,4 @@ dev: python
 
 docs:
 	mdbook build docs
-	mv -f docs/book/ book
+	mv -f docs/book/ website
