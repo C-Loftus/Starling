@@ -33,6 +33,16 @@ dev: python
 	pipenv install --dev
 
 # make -B
-docs:
+# just redownload since it isn't always the case that the repo already exists
+# and the the repo is small regardless
+pull_docs:
+	rm -rf src/docs/book
+	git clone https://github.com/C-Loftus/StarlingDocs src/docs/book
+
+
+update_docs: pull_docs
 	mdbook build docs
-	ln docs/book/* ../StarlingBook/
+	@cd docs/book	
+	@git add . 
+	@git commit -m "update docs"
+	git push
