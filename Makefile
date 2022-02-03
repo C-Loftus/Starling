@@ -35,14 +35,17 @@ dev: python
 # make -B
 # just redownload since it isn't always the case that the repo already exists
 # and the the repo is small regardless
-pull_docs:
-	rm -rf src/docs/book
-	git clone https://github.com/C-Loftus/StarlingDocs src/docs/book
+# pull_docs:
+# 	rm -rf docs/remote
+# 	rm -rf docs/book
+# 	git clone https://github.com/C-Loftus/StarlingDocs docs/remote
 
 
-update_docs: pull_docs
+# update_docs: pull_docs
+# 	mdbook build docs
+# 	mv -n docs/book/* docs/remote/
+# 	@cd docs/book; git add .; git commit -m "update docs"; git push --repo . origin master
+
+docs:
 	mdbook build docs
-	@cd docs/book	
-	@git add . 
-	@git commit -m "update docs"
-	git push
+	mv -f docs/book/ book
