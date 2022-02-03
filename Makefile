@@ -35,3 +35,4 @@ dev: python
 # make -B
 docs:
 	mdbook build docs
+	ln docs/book/* ../StarlingBook/
