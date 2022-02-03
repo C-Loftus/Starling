@@ -12,6 +12,7 @@ To uninstall
 ```
 make uninstall
 ```
+
 ## Running
 pipenv installs all python packages in this folder. That way they will not conflict with your existing python environments. `pipenv` before the command will run it in this environment.
 ```

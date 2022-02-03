@@ -1,0 +1,12 @@
+[book]
+authors = ["https://github.com/C-Loftus"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Starling Documentation"
+
+[output.html]
+additional-css = [
+  "theme/light.css",
+  "theme/dark.css",
+]

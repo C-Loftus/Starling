@@ -32,3 +32,6 @@ python:
 dev: python
 	pipenv install --dev
 
+# make -B
+docs:
+	mdbook build docs
