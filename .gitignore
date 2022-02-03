@@ -4,3 +4,4 @@ __pycache__
 source.sh
 model/
 .vscode/*
+docs/book/*
