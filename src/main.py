@@ -8,14 +8,13 @@ from setup_conf import application_config
 from AppIndicator.socket_fns import *
 from vosk_bindings.mic_input import VoskModel
 
-CONFIG_PATH = "config.yaml"
 
 # Parses the config and  normalizes audio to the ambient env volume
 def init_conf_and_env():
     screen_print("Initializing...", delay=4)
     
     # Get the config From the user supplied file
-    app_conf = application_config(CONFIG_PATH)
+    app_conf = application_config()
     
     # Initialize the app indicator on the dock
     p = Process(target=ProgramIndicator, args=(app_conf,))

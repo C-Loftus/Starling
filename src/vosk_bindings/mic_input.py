@@ -4,7 +4,6 @@ import sounddevice as sd
 import vosk
 import sys
 
-MODEL_PATH='src/vosk_bindings/model'
 import os, sys
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -15,8 +14,11 @@ import Desktop.mode_functions as status
 
 class VoskModel:
     def __init__(self, conf):
+        ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+        self.MODEL_PATH=os.path.join(ROOT_DIR,"vosk_bindings", "model")
+    
         vosk.SetLogLevel(-1)
-        self.model = vosk.Model(MODEL_PATH)
+        self.model = vosk.Model(self.MODEL_PATH)
         self.tmp_cmd_list = None
         self.conf = conf
         self.cmd_list = self.base_command_mode_command_list()
@@ -31,11 +33,10 @@ class VoskModel:
 
     def record_and_infer(self, mode, device=sd.default.device, samplerate=16000):
         try:
-            model = "src/vosk_bindings/model"
         
-            if not os.path.exists(model):
+            if not os.path.exists(self.MODEL_PATH):
                 print ("Please download a model for your language from https://alphacephei.com/vosk/models")
-                print ("and unpack as 'model' in folder: {}".format(model))
+                print ("and unpack as 'model' in folder: {}".format(self.MODEL_PATH))
                 exit(0)
             device_info = sd.query_devices(device, 'input')
             # soundfile expects an int, sounddevice provides a float:

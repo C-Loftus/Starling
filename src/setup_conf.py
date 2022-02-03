@@ -1,11 +1,14 @@
 import yaml
 from nvidia.transcribe_speech import *
 from collections import ChainMap
+import os
 
 class application_config:
 
-
-    def __init__(self, config_path):
+    def __init__(self):
+        ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+        config_path = os.path.join(ROOT_DIR, "config.yaml")
+        
         self.config_path = config_path
         self._load_config()
         self._load_transcription_config()
