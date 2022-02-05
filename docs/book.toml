@@ -7,6 +7,6 @@ title = "Starling Documentation"
 
 [output.html]
 additional-css = [
-  "theme/light.css",
+  # "theme/light.css",
   "theme/dark.css",
 ]

@@ -59,6 +59,4 @@ def timer_create(min_until_break, delay):
 if __name__ == '__main__':
     from time import gmtime, strftime
     print (strftime("%Y-%m-%d %H:%M:%S", gmtime()))
-    screen_print("Starting", delay=5, position="middle")
-    print("starting")
     timer_create(30, delay=5)
