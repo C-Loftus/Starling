@@ -18,5 +18,7 @@ pipenv installs all python packages in this folder. That way they will not confl
 pipenv python3 src/main.py
 ```
 ## Help
-For a detailed list of program functionality please consult the project's website. If you have a technical problem or found a bug please feel free to create a Github issue.
-https://c-loftus.github.io/StarlingDocs/
+For a detailed list of program functionality please consult the project's website here: https://c-loftus.github.io/StarlingDocs/
+
+If you have a technical problem or found a bug please feel free to create a Github issue.
+
