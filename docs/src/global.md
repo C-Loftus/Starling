@@ -1,4 +1,5 @@
 # Global Behavior
+This behavior is universal to Starling no matter what mode you are in.
 ## Switching Modes
 To switch to a different mode, say one of the following phrases.
 ` Command mode`
@@ -11,6 +12,7 @@ For many users fighting repetitive strain injury, having a system timer to remin
 `start timer`
 `end timer `
 
+ This timer will automatically print a message to the screen if you have been working for longer than the time specified in the config file.  This message will not go away until you have taken a break. A break is detected if you have ben idle at the computer for longer than the specified amount of time in the config file.
 ## Tray Indicator
 Starling  uses a tray indicator that is compatible with most system trays on Linux.  This tray indicator can be used to quit the application, start a timer, or end a timer. Sleep mode  is represented with a moon icon. 
 

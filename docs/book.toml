@@ -6,7 +6,9 @@ src = "src"
 title = "Starling Documentation"
 
 [output.html]
-additional-css = [
-  # "theme/light.css",
-  "theme/dark.css",
-]
+git-repository-url = "https://github.com/C-Loftus/Starling"
+git-repository-icon = "fa-github"
+default-theme="rust"
+preferred-dark-theme = "rust"
+
+preferred-light-theme = "rust"
