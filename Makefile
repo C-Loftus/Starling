@@ -29,7 +29,7 @@ python:
 	pip3 install --user --upgrade --upgrade-strategy eager pipenv wheel setuptools
 	pipenv install
 
-dev: python
+dev: python nemo
 	pipenv install --dev
 
 	

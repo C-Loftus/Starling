@@ -23,5 +23,5 @@ make uninstall
 pipenv installs all python packages for Starling in its own separate folder. That way they will not conflict with your existing python environments. `pipenv` before the command will run it in this environment.
 ```bash
 cd Starling
-pipenv python3 src/main.py
+pipenv run python3 src/main.py
 ```
