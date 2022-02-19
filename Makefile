@@ -21,12 +21,14 @@ nemo:
 vosk:
 	wget https://alphacephei.com/kaldi/models/vosk-model-small-en-us-0.15.zip
 	unzip vosk-model-small-en-us-0.15.zip
-	mv vosk-model-small-en-us-0.15 src/vosk-api/model
+	mkdir src/vosk-api/model
+	mv vosk-model-small-en-us-0.15 src/vosk-bindings/model
 	rm vosk-model-small-en-us-0.15.zip
 
 python:
 	pip3 install --upgrade pip
-	pip3 install --user --upgrade --upgrade-strategy eager pipenv wheel setuptools
+	pip3 install --user --upgrade --upgrade-strategy eager wheel setuptools
+	sudo apt install pipenv
 	pipenv install
 
 dev: python nemo

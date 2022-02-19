@@ -8,12 +8,12 @@ from threading import Thread
 from multiprocessing import Process
 from turtle import pos
 
-def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*", position="bottom"):
+def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*", position="bottom", color="purple"):
 
     thread = Thread(target=os.system, \
         args=("echo {} | osd_cat --delay={} \
-             -A center --pos {} --color white -u blue -O 2 -f {}"
-             .format(message, delay, position, font),)
+             -A center --pos {} --color white -u {} -O 2 -f {}"
+             .format(message, delay, position, color, font),)
         )
     thread.start()
 
@@ -33,6 +33,8 @@ def timer_create(min_until_break, delay):
 
     def work_time():
         time = 0
+        breaksNotTaken = 0
+
         while True:
             # We can use slow polling since only long breaks matter
             t.sleep(30)
@@ -45,10 +47,13 @@ def timer_create(min_until_break, delay):
             print(f'Idle time = {round(idle_time(), 4)} minutes')
 
             if idle_time() > 5.0:
-                time = 0
+                time, breaksNotTaken = 0, 0
                 print("break detected")
             elif (time) > (seconds_until_break):
-                screen_print('Time to take a break!', delay=delay)
+                if breaksNotTaken > 10:
+                    color = "red"
+                    screen_print('Time to take a break!', delay=delay, color=color)
+                breaksNotTaken += 1
 
     p = Process(target=work_time)
     p.start()
