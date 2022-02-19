@@ -21,7 +21,6 @@ nemo:
 vosk:
 	wget https://alphacephei.com/kaldi/models/vosk-model-small-en-us-0.15.zip
 	unzip vosk-model-small-en-us-0.15.zip
-	mkdir -p $(CURDIR)/src/vosk-bindings/model
 	mv vosk-model-small-en-us-0.15 $(CURDIR)/src/vosk-bindings/model
 	rm vosk-model-small-en-us-0.15.zip
 
@@ -29,7 +28,12 @@ python:
 	pip3 install --upgrade pip
 	pip3 install --user --upgrade --upgrade-strategy eager wheel setuptools
 	sudo -H pip install -U pipenv
+	sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0
+	sudo apt install portaudio19-dev
+	sudo apt install gir1.2-appindicator3-0.1
+	sudo apt-get install python3-tk
 	pipenv install
+### run pip3 uninstall virtualenv if there is an issue building distuil
 
 dev: python nemo
 	pipenv install --dev
