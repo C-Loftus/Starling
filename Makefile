@@ -28,7 +28,7 @@ vosk:
 python:
 	pip3 install --upgrade pip
 	pip3 install --user --upgrade --upgrade-strategy eager wheel setuptools
-	sudo apt install pipenv
+	sudo -H pip install -U pipenv
 	pipenv install
 
 dev: python nemo
