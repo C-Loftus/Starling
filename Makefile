@@ -21,7 +21,7 @@ nemo:
 vosk:
 	wget https://alphacephei.com/kaldi/models/vosk-model-small-en-us-0.15.zip
 	unzip vosk-model-small-en-us-0.15.zip
-	mv vosk-model-small-en-us-0.15 $(CURDIR)/src/vosk-bindings/model
+	mv $(CURDIR)/vosk-model-small-en-us-0.15 $(CURDIR)/src/vosk-bindings/model
 	rm vosk-model-small-en-us-0.15.zip
 
 python:
