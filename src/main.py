@@ -7,7 +7,6 @@ from nvidia.transcribe_speech import *
 from setup_conf import application_config
 from AppIndicator.socket_fns import *
 from vosk_bindings.mic_input import VoskModel
-from distutils import util
 
 # Parses the config and  normalizes audio to the ambient env volume
 def init_conf_and_env():
