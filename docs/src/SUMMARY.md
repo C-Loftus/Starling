@@ -7,6 +7,7 @@
   - [Keypresses](./keys.md)
   - [Window Commands](./window.md)
   - [Custom Commands](./custom.md)
+  - [Sample Config](config.md)
 - [Shell Mode](./shell.md)
 - [Dictation Mode](./dictation.md)
 - [Sleep Mode](./sleep.md)

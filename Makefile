@@ -6,6 +6,8 @@ ubuntu: apt
 mint: apt 
 debian: apt 
 pop-os: apt
+mint: apt
+make: elementary
 
 uninstall:
 	rm -rf src/nvidia/*.nemo
