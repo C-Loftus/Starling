@@ -2,12 +2,13 @@
 apt: vosk python
 	sudo apt install gir1.2-appindicator3-0.1 libxosd2 xosd-bin xdotool xprintidle
 
+#### run make TARGET to build for your distro. ####
 ubuntu: apt 
 mint: apt 
 debian: apt 
 pop-os: apt
 mint: apt
-make: elementary
+elementary: apt
 
 uninstall:
 	rm -rf src/nvidia/*.nemo
