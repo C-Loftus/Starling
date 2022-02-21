@@ -3,10 +3,16 @@ from Desktop.generic_linux import screen_print
 from Desktop.gnome import *
 from Desktop.mode_functions import handle_transcription, mode
 from Audio.recording import *
-from nvidia.transcribe_speech import *
+
 from setup_conf import application_config
 from AppIndicator.socket_fns import *
 from vosk_bindings.mic_input import VoskModel
+
+try:
+    from nvidia.transcribe_speech import *
+except:
+    print("No nvidia toolkit installed. Falling back to Vosk\
+ Ignore this error unless you care about switching models.")
 
 # Parses the config and  normalizes audio to the ambient env volume
 def init_conf_and_env():

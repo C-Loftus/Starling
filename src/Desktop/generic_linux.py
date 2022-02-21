@@ -8,7 +8,7 @@ from threading import Thread
 from multiprocessing import Process
 from turtle import pos
 
-def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*", position="bottom", color="purple"):
+def screen_print(message,  delay=2, font="-*-*-medium-*-*-*-*-*-*-*-*-120-*-*", position="bottom", color="blue"):
 
     thread = Thread(target=os.system, \
         args=("echo {} | osd_cat --delay={} \
@@ -50,9 +50,9 @@ def timer_create(min_until_break, delay):
                 time, breaksNotTaken = 0, 0
                 print("break detected")
             elif (time) > (seconds_until_break):
-                if breaksNotTaken > 10:
+                if breaksNotTaken > 50:
                     color = "red"
-                    screen_print('Time to take a break!', delay=delay, color=color)
+                screen_print('Time to take a break!', delay=delay, color=color)
                 breaksNotTaken += 1
 
     p = Process(target=work_time)

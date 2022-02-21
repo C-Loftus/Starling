@@ -30,10 +30,13 @@ python:
 	sudo -H pip install -U pipenv
 	sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0
 	sudo apt install portaudio19-dev
-	sudo apt install gir1.2-appindicator3-0.1
+	sudo apt install gir1.2-appindicator3-0.1 python3-gi
 	sudo apt-get install python3-tk
 	pipenv install
 ### run pip3 uninstall virtualenv if there is an issue building distuil
+
+# referenece the following if there is an issue with "virtualenv-seed-embed"
+### https://stackoverflow.com/questions/63491221/modulenotfounderror-no-module-named-virtualenv-seed-embed-via-app-data-when-i
 
 dev: python nemo
 	pipenv install --dev

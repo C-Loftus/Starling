@@ -1,6 +1,9 @@
-time_before_break: 20 #minutes
-shell_safety_duration: 5 #seconds
+###  it is recommended to edit in an editor like visual studio code to make sure
+### yaml syntax is correct
 
+
+################# APPLICATION REFERENCE NAMES ##########
+# easy alias names allow for better accuracy
 editor: "Visual Studio Code"
 terminal: "Kitty"
 browser: "Mozilla Firefox"
@@ -8,8 +11,17 @@ game: ""
 slides: ""
 
 
-#list of all keys
+############ USER APPLICATIONS NATURAL LANGUAGE COMMANDS ##########
+
+# SYNTAX:
+
+# APPLICATON_NAME:
+# - exe_path: "/bin/example"
+# - command: "ctrl alt del"
+
+### Names of potential keys you can input: 
 # ['\t', '\n', '\r', ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~', 'accept', 'add', 'alt', 'altleft', 'altright', 'apps', 'backspace', 'browserback', 'browserfavorites', 'browserforward', 'browserhome', 'browserrefresh', 'browsersearch', 'browserstop', 'capslock', 'clear', 'convert', 'ctrl', 'ctrlleft', 'ctrlright', 'decimal', 'del', 'delete', 'divide', 'down', 'end', 'enter', 'esc', 'escape', 'execute', 'f1', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f2', 'f20', 'f21', 'f22', 'f23', 'f24', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'final', 'fn', 'hanguel', 'hangul', 'hanja', 'help', 'home', 'insert', 'junja', 'kana', 'kanji', 'launchapp1', 'launchapp2', 'launchmail', 'launchmediaselect', 'left', 'modechange', 'multiply', 'nexttrack', 'nonconvert', 'num0', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8', 'num9', 'numlock', 'pagedown', 'pageup', 'pause', 'pgdn', 'pgup', 'playpause', 'prevtrack', 'print', 'printscreen', 'prntscrn', 'prtsc', 'prtscr', 'return', 'right', 'scrolllock', 'select', 'separator', 'shift', 'shiftleft', 'shiftright', 'sleep', 'space', 'stop', 'subtract', 'tab', 'up', 'volumedown', 'volumemute', 'volumeup', 'win', 'winleft', 'winright', 'yen', 'command', 'option', 'optionleft', 'optionright']
+
 Mozilla Firefox:
 - exe_path : "firefox"
 - go foward: "alt right"
@@ -26,21 +38,14 @@ Visual Studio Code:
 
 Kitty:
 - exe_path : "kitty"
+- split window: "ctrl shift enter"
 
+################### ALHPABET & KEY NAMES ######################
+#### these change be changed to any single word value 
+#### that does not conflict with another command
 
-models:
-- default: vosk
-- nvidia_nemo:
-    - model_path: "src/nvidia/stt_en_conformer_ctc_medium.nemo"
-    - pretrained_name: "stt_en_conformer_ctc_medium"
-    - cuda : -1
-    - audio_dir : "Assets/"
-    - audio_type : "wav"
-    - batch_size : 12 
-- vosk:
-  - type: "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip"
-
-
+## if you try to use a word that is not in english vocab,
+## the model will not recognize it.
 alphabet: 
   - air       : "a" 
   - bat       : "b" 
@@ -71,3 +76,29 @@ alphabet:
   - enter     : "enter"
   - escape    : "escape"
   - home      : "home"
+  - down      : "pagedown"
+  - up        : "pageup"
+  - back : "backspace"
+  - delete    : "delete"
+  - quieter   : 'volumedown'
+  - mute      : 'volumemute'
+  - louder    : 'volumeup'
+
+################TIMER INFO#######################
+time_before_break: 20 #minutes
+shell_safety_duration: 5 #seconds
+
+##################################################
+### ONLY EDIT BELOW IF YOU WANT A CUSTOM MODEL ###
+##################################################
+models:
+- default: vosk
+- nvidia_nemo:
+    - model_path: "src/nvidia/stt_en_conformer_ctc_medium.nemo"
+    - pretrained_name: "stt_en_conformer_ctc_medium"
+    - cuda : -1
+    - audio_dir : "Assets/"
+    - audio_type : "wav"
+    - batch_size : 12 
+- vosk:
+  - type: "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip"

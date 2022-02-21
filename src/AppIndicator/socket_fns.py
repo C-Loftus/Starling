@@ -17,14 +17,13 @@ class ClientSocket:
 
     def check_to_send(self, prev, curr, msg) -> None:
         msg = ''.join(msg)
-        print("Checking to send: ", msg)
 
         if msg == "quit application":
             self.s.send(("quit application").encode())
             self.end_socket()
             return
         if prev != curr:
-            print("sending \'" + msg + "\'")
+            print("sending \'" + msg + "\' to update appindicator")
             self.s.send(msg.encode())
     
     def end_socket(self):

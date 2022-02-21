@@ -10,6 +10,7 @@ Once you have downloaded the code, you can then begin the process of setting it 
 You must have python3, pip3, and make installed. These should already be installed on most distributions. 
 To build, type either your package manager name or OS name. (i.e. `ubuntu`, `pop-os`, `apt` all build the same)
 ```
+cd Starling
 make ubuntu 
 ```
  The installation process will install all python dependencies and download the model used for voice recognition.

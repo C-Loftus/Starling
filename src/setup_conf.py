@@ -1,5 +1,10 @@
 import yaml
-from nvidia.transcribe_speech import *
+try:
+    from nvidia.transcribe_speech import *
+except:
+    # don't need to print an error message since you already
+    # did in main.py
+    pass
 from collections import ChainMap
 import os
 
@@ -77,16 +82,13 @@ class application_config:
 
     #  user shouldn't need to change this. all is handled automatically
     def _load_transcription_config(self):
-        TranscriptionConfig.model_path = "src/nvidia/stt_en_conformer_ctc_medium.nemo"
-        TranscriptionConfig.pretrained_name = "stt_en_conformer_ctc_medium"
-        TranscriptionConfig.cuda = -1
-        TranscriptionConfig.audio_dir = "src/Assets/"
-        TranscriptionConfig.audio_type = "wav"
-        TranscriptionConfig.batch_size=32
-
-if __name__ == '__main__':
-    config_path = "config.yaml"
-    conf = application_config(config_path)
-    print(conf.get_alphabet())
-    print(conf.get_browser_cmds())    
-    print(conf.get_context('Mozilla Firefox'))
+        try:
+            TranscriptionConfig.model_path = "src/nvidia/stt_en_conformer_ctc_medium.nemo"
+            TranscriptionConfig.pretrained_name = "stt_en_conformer_ctc_medium"
+            TranscriptionConfig.cuda = -1
+            TranscriptionConfig.audio_dir = "src/Assets/"
+            TranscriptionConfig.audio_type = "wav"
+            TranscriptionConfig.batch_size=32
+        except:
+            # this means that the nvidia toolkit is not installed
+            pass

@@ -45,8 +45,3 @@ if __name__ == "__main__":
     from time import sleep
     w = get_focused_window_name()
     print(w)
-    sleep(3)
-    close_window_by_id(get_id_from_name("Visual Studio Code"))
-
-    # close_process(get_focused_window_pid())
-   
