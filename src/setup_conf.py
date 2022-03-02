@@ -30,15 +30,18 @@ class application_config:
                 self.alphabet = alpha
                 self.time_before_break = self.config['time_before_break']
                 self.safety_time = self.config['shell_safety_duration']
-
-                self.browser = self.config['browser']
+                
+                try:
+                    self.browser = self.config['browser']
+                except:
+                    print("No browser specified in config.yaml")
 
                 web = {}
                 for dictionary in self.config[self.browser]:
                     web.update(dictionary)
 
                 self.browser_cmds = web
-
+#
                 self.editor = self.config['editor']
                 self.terminal = self.config['terminal']
 

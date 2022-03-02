@@ -9,6 +9,16 @@ The  config file is set up as follows
 * app names as they are seen by the os
 *  natural language commands which are ran in the context only when a window with that app name is focused
 
+#### How to get the proper application names
+When customizing, you must used the proper name for the application as it is seen within the OS.  Otherwise, Starling will not know  exactly which application you're referring to.
+
+To do this you can use the following script. Simply  Run the script and click on the window that you want to know the proper name of.
+```bash
+cd Starling
+# use chmod to make sure it is executable. Only need to do this once
+chmod +x get_app_name.sh
+./get_app_name.sh
+```
 
 #### A Bad Example
  ```yaml

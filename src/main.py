@@ -62,8 +62,8 @@ def main():
             elif default == "vosk":
                 transcriptions = model.record_and_infer(current_mode)
             
-            print(transcriptions)
             if current_mode is not mode.SLEEP:
+                print(transcriptions)
                 screen_print(transcriptions)
 
             # all mode switching, gui, and keyboard automation code is handlded here

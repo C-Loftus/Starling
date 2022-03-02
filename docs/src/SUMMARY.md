@@ -1,7 +1,7 @@
 # Summary
 
 - [Overview](./about.md)
-- [Installing](./installing.md)
+- [Installing and Running](./installing.md)
 - [Global Behavior](global.md)
 - [Command Mode](./command.md)
   - [Keypresses](./keys.md)

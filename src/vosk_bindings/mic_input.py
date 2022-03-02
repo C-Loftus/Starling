@@ -1,3 +1,5 @@
+# most up to date
+# Default for vosk bindings
 import os
 import queue
 import sounddevice as sd
@@ -74,20 +76,25 @@ class VoskModel:
     def base_command_mode_command_list(self):
         modes="\"command sleep dictation shell mode\""
 
-        letters = "\"one two three four five six seven eight nine zero\""
-        modifiers = "\"shift alt control super enter win\""
+        numbers = "\"one two three four five six seven eight nine zero\""
+        modifiers = "\"shift alt control super enter win sentence\""
+
 
         alphabet = self.conf.get_alphabet()
-        res = ' '.join(key for key, _ in alphabet.items())
-        res = "\"" + res + "\""
+        alphabet = ' '.join(key for key, _ in alphabet.items())
+        alphabet = "\"" + alphabet + "\""
+
+        aliases = self.conf.get_config()
+        aliases = ' '.join(key.lower() for key in aliases if "_" not in key)
+        aliases = "\"" + aliases + "\""
 
         window_actions = '\"focus start close maximize minimize\"'
         apps = '\"editor terminal browser this\"'
 
         indicator = '\"quit application timer start stop\"'
 
-        return "[{},{},{},{},{},{},{},".\
-            format(letters, modifiers, res, window_actions, modes, apps, indicator)
+        return "[{},{},{},{},{},{},{},{},".\
+            format(numbers, modifiers, alphabet, window_actions, modes, apps, indicator, aliases)
 
     def tmp_command_mode_list(self, conf):
         import Desktop.xdotool_wrappers as xdotool
@@ -96,7 +103,3 @@ class VoskModel:
         context_cmds = conf.get_context_cmds(context)
         res = ' '.join(key for key, _ in context_cmds.items() if key != "exe_path")
         return '\"'+ res + '\"]'
-
-if __name__ == "__main__":
-    v = VoskModel(None)
-    v.record_and_infer()       

@@ -24,6 +24,4 @@ As such my goals have been to create a program with:
 My goal is to have the program be as easy or complex as the user wanted it to be. Namely, if a user  doesn't have any programming experience,  the program can be entirely customized in a config file. However, if a user does have programming experience, the program can  draw upon all existing scripts or aliases  sourced in default shell.
 
 ## Help
-
-
 For a detailed list of program functionality please consult this website. If you have a technical problem or found a bug please feel free to create a [Github issue](https://github.com/C-Loftus/Starling/issues).

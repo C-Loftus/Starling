@@ -78,7 +78,7 @@ alphabet:
   - home      : "home"
   - down      : "pagedown"
   - up        : "pageup"
-  - back : "backspace"
+  - back      : "backspace"
   - delete    : "delete"
   - quieter   : 'volumedown'
   - mute      : 'volumemute'
