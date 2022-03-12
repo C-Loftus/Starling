@@ -39,9 +39,12 @@ def minimize_window_by_id(id):
 
 def maximize_window_by_id(id):
     # xdotool windowmaximize id
-    p = subprocess.Popen(['xdotool', 'windowsize', id, '100%', '100%'], stdout=subprocess.PIPE)
+    p = subprocess.Popen(['wmctrl', '-ir', id, '-b', 'add,maximized_vert,maximized_horz'], stdout=subprocess.PIPE)
 
 if __name__ == "__main__":
     from time import sleep
     w = get_focused_window_name()
+    id = get_id_from_name(w)
+    sleep(5)
+    maximize_window_by_id(id)
     print(w)

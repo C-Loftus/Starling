@@ -9,7 +9,10 @@ class ClientSocket:
         import os
         pid = os.getpid()
         s = socket()
+        
         s.connect(('localhost', self.PORT))
+
+
         message=("pid:" + str(pid)).encode()
         s.send(message)
 

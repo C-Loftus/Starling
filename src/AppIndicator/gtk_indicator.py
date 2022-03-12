@@ -28,8 +28,6 @@ sys.path.append(parent)
 from AppIndicator.socket_fns import ClientSocket    
 from Desktop.generic_linux import *
 
-PORT = ClientSocket.PORT
-
 APPINDICATOR_ID = 'scriptindicator'
 
 # Indicator for shell mode
@@ -62,7 +60,7 @@ class ProgramIndicator:
 
     # /https://stackoverflow.com/questions/8826523/gtk-main-and-unix-sockets
         self.s = socket()    
-        self.s.bind(('localhost', PORT))    
+        self.s.bind(('localhost', ClientSocket.PORT))    
         self.s.listen()    
         GLib.io_add_watch(GLib.IOChannel(self.s.fileno()), 0, GLib.IOCondition.IN, self.listener, self.s)    
         return gtk.main()
@@ -124,8 +122,8 @@ class ProgramIndicator:
         finally:
             notify.uninit()
             gtk.main_quit()
-        self.s.close()
-        screen_print("Quitting app", position="middle", delay=5)
+            self.s.close()
+            screen_print("Quitting app", position="middle", delay=5)
 
 
     def listener(self, io, cond, sock):    

@@ -6,7 +6,7 @@
 # easy alias names allow for better accuracy
 editor: "Visual Studio Code"
 terminal: "Kitty"
-browser: "Mozilla Firefox"
+browser: "Google Chrome"
 game: ""
 slides: ""
 
@@ -32,6 +32,10 @@ Mozilla Firefox:
 - search bar: "ctrl j"
 - fold window: "ctrl w"
 
+Google Chrome:
+- exe_path: "google-chrome"
+- search: "ctrl l"
+
 Visual Studio Code:
 - exe_path : "code"
 - new command: "ctrl shift p"
@@ -41,7 +45,7 @@ Kitty:
 - split window: "ctrl shift enter"
 
 ################### ALHPABET & KEY NAMES ######################
-#### these change be changed to any single word value 
+#### these can be changed to any single word value 
 #### that does not conflict with another command
 
 ## if you try to use a word that is not in english vocab,

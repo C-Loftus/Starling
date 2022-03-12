@@ -1,6 +1,6 @@
 ################VV## user targets ##VV###############
 apt: vosk python
-	sudo apt install gir1.2-appindicator3-0.1 libxosd2 xosd-bin xdotool xprintidle
+	sudo apt install gir1.2-appindicator3-0.1 libxosd2 xosd-bin xdotool xprintidle wmctrl
 
 #### run make TARGET to build for your distro. ####
 ubuntu: apt 
@@ -47,6 +47,7 @@ dev: python nemo
 	
 
 # make -B
+# cd newIWVoice/; make -B docs; cd ../StarlingDocs/; fgc updated; cd ../
 docs: 
 	mdbook build docs
 	cp -r docs/book/* ../StarlingDocs/
