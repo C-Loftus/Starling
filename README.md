@@ -17,6 +17,8 @@ pipenv installs all python packages in this folder. That way they will not confl
 ```
 pipenv python3 src/main.py
 ```
+## A Basic Demo
+[![Starling Demo](https://res.cloudinary.com/marcomontalbano/image/upload/v1648409359/video_to_markdown/images/youtube--6RkabUd42YA-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=6RkabUd42YA "Starling Demo")
 ## Help
 For a detailed list of program functionality please consult the project's website here: https://c-loftus.github.io/StarlingDocs/
 
