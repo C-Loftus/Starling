@@ -34,6 +34,7 @@ Mozilla Firefox:
 
 Google Chrome:
 - exe_path: "google-chrome"
+- new bookmark: "ctrl d"
 - search: "ctrl l"
 
 Visual Studio Code:
